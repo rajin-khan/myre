@@ -57,7 +57,7 @@ a { color: inherit; }
 .brand-mark i:nth-child(2), .brand-mark i:nth-child(3) { background: #e8795d; }
 .intro {
   position: relative;
-  min-height: 270px;
+  min-height: 240px;
   padding: 46px 0 32px;
 }
 
@@ -70,7 +70,6 @@ a { color: inherit; }
 h1, h2, p { margin-top: 0; }
 .intro h1 { margin: 0; font-size: clamp(48px, 7.2vw, 88px); line-height: .91; font-weight: 600; letter-spacing: -.075em; }
 .intro h1 em, .game-night h2 em { color: #d5684c; font-family: var(--serif); font-weight: 500; }
-.intro-copy { width: min(300px, 32%); position: absolute; right: 11%; bottom: 43px; margin: 0; color: #55594f; font-family: var(--serif); font-size: 17px; line-height: 1.35; }
 .intro-doodle { position: absolute; right: 2%; top: 48px; width: 105px; height: 105px; border: 1px dashed rgb(34 38 31 / 28%); border-radius: 50%; color: #e0785c; }
 .intro-doodle span:first-child { position: absolute; top: 3px; left: 27px; font-size: 32px; }
 .intro-doodle span:last-child { position: absolute; right: 16px; bottom: 16px; font: 22px var(--mono); transform: rotate(-20deg); }
@@ -301,9 +300,8 @@ h1, h2, p { margin-top: 0; }
 @media (max-width: 760px) {
   .page-shell { width: min(100% - 32px, 560px); }
   .topbar { min-height: 60px; }
-  .intro { min-height: 250px; padding-top: 38px; }
+  .intro { min-height: 205px; padding-top: 38px; }
   .intro h1 { font-size: clamp(54px, 15vw, 78px); }
-  .intro-copy { position: static; width: min(250px, 72%); margin: 19px 0 0 5px; font-size: 15px; }
   .intro-doodle { top: 89px; right: 2%; width: 78px; height: 78px; }
   .intro-doodle span:first-child { left: 21px; font-size: 25px; }
   .intro-doodle span:last-child { right: 10px; bottom: 9px; font-size: 17px; }
