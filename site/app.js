@@ -303,7 +303,7 @@ function setAccess(name) {
   signedIn.hidden = !name;
   signedInName.textContent = name || "";
   learningContent.hidden = !canEdit;
-  document.querySelector("#refresh-button").hidden = !canEdit;
+  document.querySelector("#retry-button").hidden = true;
   accessCopy.textContent = canEdit
     ? "Shared changes save for the whole crew."
     : "Choose your name and enter your password.";
@@ -351,12 +351,14 @@ document.querySelector("#sign-out-button").addEventListener("click", async () =>
   } catch (error) { report(error); }
 });
 
-document.querySelector("#refresh-button").addEventListener("click", async () => {
-  try {
-    await refreshAccess();
-    announce("Board refreshed.");
-  } catch (error) { report(error); }
-});
+for (const button of document.querySelectorAll("#refresh-button, #retry-button")) {
+  button.addEventListener("click", async () => {
+    try {
+      await refreshAccess();
+      announce(canEdit ? "Board refreshed." : "Sign in to open studies.");
+    } catch (error) { report(error); }
+  });
+}
 
 document.addEventListener("visibilitychange", () => {
   if (canEdit && !document.hidden) refreshAccess().catch(report);
@@ -510,7 +512,7 @@ async function start() {
   } catch (error) {
     accessCopy.textContent = "The studies board could not load.";
     signInForm.hidden = true;
-    document.querySelector("#refresh-button").hidden = false;
+    document.querySelector("#retry-button").hidden = false;
     report(error);
   }
 }

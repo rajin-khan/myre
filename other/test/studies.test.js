@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const handler = require("../site/api/studies.js");
+const handler = require("../../site/api/studies.js");
 
 function response() {
   return {

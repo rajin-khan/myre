@@ -262,9 +262,9 @@ h1, h2, p { margin-top: 0; }
 .study-access .sign-in-field input, .study-access .sign-in-field select { width: 100%; min-width: 0; min-height: 44px; font-size: 16px; }
 .study-access form .pin-button { min-height: 44px; white-space: nowrap; }
 .study-access .field-error { grid-column: 2; margin: -3px 0 0; color: #743723; font: 12px/1.4 var(--sans); }
-.study-access #refresh-button { justify-self: end; min-height: 44px; font-size: 11px; }
-.study-access .signed-in { font-size: 12px; }
-.study-access .signed-in button { min-height: 44px; font-size: 11px; }
+.study-access #retry-button { justify-self: end; min-height: 44px; font-size: 11px; }
+.study-access .signed-in { justify-self: end; gap: 7px; font-size: 12px; }
+.study-access .signed-in button { min-height: 44px; padding-inline: 7px; font-size: 11px; }
 .learning-status { font-size: 11px; }
 .learning-page .learning-section-note, .learning-page .kanban-heading p { font-size: 13px; }
 .learning-page .field-group label, .learning-page .field-group small, .learning-page .progress-checks legend { font-size: 11px; }
@@ -423,7 +423,7 @@ h1, h2, p { margin-top: 0; }
   .study-access form { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .study-access form .pin-button { grid-column: 1 / -1; justify-self: start; }
   .study-access .field-error { grid-column: 1; }
-  .study-access #refresh-button { justify-self: start; }
+  .study-access .signed-in, .study-access #retry-button { justify-self: start; }
   .crew-notebooks { grid-template-columns: 1fr; }
 }
 

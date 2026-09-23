@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { generateKeyPairSync, sign } = require("node:crypto");
-const handler = require("../site/api/learning-sync.js");
+const handler = require("../../site/api/learning-sync.js");
 
 function response() {
   return {
