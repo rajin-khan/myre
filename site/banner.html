@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3efe4">
     <meta name="description" content="myre, a little computer project by groceryboix.">
-    <title>myre — groceryboix</title>
+    <title>myre</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="banner.css">
   </head>
@@ -61,13 +61,12 @@
         <article class="tile layers-tile">
           <div class="tile-head"><span>02 / UNDER THE HOOD</span><span>ONE THING AT A TIME</span></div>
           <h2>how the pieces<br>fit together.</h2>
-          <div class="layers" aria-label="Hardware, kernel, shell, and desktop layers">
-            <span class="layer layer-desktop">desktop <i>what we see</i></span>
-            <span class="layer layer-shell">shell <i>where we ask</i></span>
-            <span class="layer layer-kernel">kernel <i>the core rules</i></span>
-            <span class="layer layer-hardware">hardware <i>the real machine</i></span>
-          </div>
-          <span class="layer-scribble" aria-hidden="true">peek inside ↘</span>
+          <ol class="layer-stack" aria-label="Learning path from desktop to hardware">
+            <li class="layer layer-desktop">desktop <span>the part we see</span></li>
+            <li class="layer layer-shell">shell <span>where we ask</span></li>
+            <li class="layer layer-kernel">kernel <span>the core rules</span></li>
+            <li class="layer layer-hardware">hardware <span>the actual machine</span></li>
+          </ol>
         </article>
 
         <article class="tile play-tile">

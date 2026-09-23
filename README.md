@@ -13,7 +13,7 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 - `site/app.js` powers the learning page. Pinned videos, checklists, and tasks are saved in the current browser only; they don't sync between people or devices.
 - `site/learning/` contains the Markdown notes shown in the hub, grouped by what we're learning, testing, and making.
 - `site/banner.html` and `site/banner.css` make the screenshot-ready banner.
-- `site/banner.png` is the supplied banner artwork.
+- `site/banner.png` is the screenshot of the HTML banner.
 - `site/favicon.svg` is the four-square icon used by the site pages.
 - `site/styles.css` styles the vision board and the responsive learning page.
 

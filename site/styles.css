@@ -128,15 +128,15 @@ h1, h2, p { margin-top: 0; }
 .card-caption { margin: 17px 0 0; color: #565268; font-size: 8px; }
 
 .layers { grid-column: span 4; min-height: 249px; background: var(--yellow); }
-.layers h2 { margin: 20px 0 12px; font: 500 26px/.98 var(--serif); letter-spacing: -.055em; }
+.layers h2 { margin: 12px 0; font: 500 26px/.98 var(--serif); letter-spacing: -.055em; }
 .layer-arrow { font: 20px var(--mono); transform: rotate(-35deg); }
-.layer-stack { display: grid; gap: 3px; width: 77%; }
-.layer { display: flex; align-items: center; justify-content: space-between; min-height: 21px; padding: 4px 7px; border: 1px solid rgb(34 38 31 / 55%); font: 8px var(--mono); text-transform: uppercase; }
-.layer i { color: rgb(34 38 31 / 62%); font-size: 7px; font-style: normal; text-transform: none; }
+.layer-stack { display: grid; gap: 4px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.layer { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 26px; padding: 4px 9px; border: 1px solid rgb(34 38 31 / 55%); font: 10px/1.2 var(--mono); text-transform: uppercase; }
+.layer span { font-size: 9px; text-align: right; text-transform: none; }
 .layer-desktop { width: 76%; margin-left: 24%; background: #f3e4b3; }
 .layer-shell { width: 84%; margin-left: 16%; background: #a8bd84; }
 .layer-kernel { width: 92%; margin-left: 8%; background: #ed9c66; }
-.layer-hardware { background: #4d6f52; color: #fff7da; }
+.layer-hardware { color: #fff7da; background: #4d6f52; }
 .page-card-link { display: block; color: inherit; text-decoration: none; }
 .page-card-link:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
 .roadmap-cue { display: inline-flex; align-items: center; gap: 10px; }
@@ -311,7 +311,6 @@ h1, h2, p { margin-top: 0; }
   .layers { min-height: 254px; }
   .learning-columns { grid-template-columns: 1fr; gap: 20px; }
   .video-fields { grid-template-columns: minmax(0, 1fr) minmax(0, .72fr); }
-  .layer-stack { width: 77%; }
   .game-night { min-height: 264px; }
   .controller-art { right: 8%; top: 72px; transform: rotate(11deg) scale(1.05); transform-origin: top right; }
   .game-night h2 { font-size: 35px; }
