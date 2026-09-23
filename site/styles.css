@@ -60,7 +60,7 @@ a { color: inherit; }
   padding: 46px 0 32px;
 }
 
-.card-index, .status-light, .game-kicker, .roadmap-note, .footer, .card-caption, .layers-note, .game-labels, .manifesto-foot {
+.card-index, .status-light, .game-kicker, .roadmap-note, .footer, .card-caption, .game-labels, .manifesto-foot {
   font-family: var(--mono);
   text-transform: uppercase;
   letter-spacing: .045em;
@@ -137,7 +137,6 @@ h1, h2, p { margin-top: 0; }
 .layer-shell { width: 84%; margin-left: 16%; background: #a8bd84; }
 .layer-kernel { width: 92%; margin-left: 8%; background: #ed9c66; }
 .layer-hardware { background: #4d6f52; color: #fff7da; }
-.layers-note { position: absolute; right: 20px; bottom: 19px; width: 87px; margin: 0; font-size: 7px; line-height: 1.5; }
 .page-card-link { display: block; color: inherit; text-decoration: none; }
 .page-card-link:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
 .roadmap-cue { display: inline-flex; align-items: center; gap: 10px; }
@@ -277,8 +276,6 @@ h1, h2, p { margin-top: 0; }
 .step-number { margin-bottom: 11px; color: #6f795b; font: 9px var(--mono); }
 .step-title { font: 600 11px var(--sans); }
 .step-detail { margin-top: 5px; color: #737767; font: 8px var(--mono); }
-.roadmap-footer { position: absolute; right: 25px; bottom: 17px; margin: 0; color: #667157; font: 8px var(--mono); text-transform: uppercase; letter-spacing: .04em; }
-
 .sticky-note { grid-column: span 4; min-height: 264px; padding: 22px 23px; background: #ef9b7e; transform: rotate(.7deg); }
 .sticky-note p { margin: 24px 0 0; font: 500 36px/.91 var(--serif); letter-spacing: -.055em; }
 .sticky-note p em { color: #4b5538; }
@@ -325,7 +322,6 @@ h1, h2, p { margin-top: 0; }
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; }
   .steps li { min-height: 80px; }
   .steps li:nth-child(2)::after { content: ""; }
-  .roadmap-footer { right: 19px; bottom: 15px; }
   .kanban-columns { grid-template-columns: 1fr; }
   .kanban-column { padding: 9px; }
   .task-control, .task-remove { min-height: 44px; }
@@ -345,7 +341,6 @@ h1, h2, p { margin-top: 0; }
 @media (max-width: 390px) {
   .page-shell { width: calc(100% - 24px); }
   .card { padding: 14px; }
-  .layers-note { right: 14px; bottom: 13px; }
   .video-fields { grid-template-columns: 1fr; }
   .video-list { grid-template-columns: 1fr; }
   .manifesto { padding: 17px; }
