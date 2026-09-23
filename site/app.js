@@ -32,7 +32,7 @@ const FOLDERS = [
   },
 ];
 
-const state = { videos: [], notes: [], tasks: [], checks: [] };
+const state = { videos: [], notes: [], tasks: [], checks: [], files: [] };
 const videoForm = document.querySelector("#video-form");
 const videoUrl = document.querySelector("#video-url");
 const videoTitle = document.querySelector("#video-title");
@@ -58,9 +58,15 @@ const signedIn = document.querySelector("#signed-in");
 const signedInName = document.querySelector("#signed-in-name");
 const accessCopy = document.querySelector("#access-copy");
 const status = document.querySelector("#learning-status");
+const notebooks = document.querySelector("#crew-notebooks");
+const markdownViewer = document.querySelector("#markdown-viewer");
+const markdownBody = document.querySelector("#markdown-body");
+const markdownTitle = document.querySelector("#markdown-viewer-title");
+const markdownSource = document.querySelector("#markdown-viewer-source");
 
 let canEdit = false;
 let editingNoteId = null;
+let selectedFile = null;
 
 function announce(message) {
   status.textContent = message;
@@ -253,10 +259,90 @@ function renderTasks() {
   }
 }
 
+function renderNotebooks() {
+  notebooks.replaceChildren();
+  for (const person of PEOPLE) {
+    const section = node("section", "crew-notebook");
+    section.append(node("h3", "", `${person}'s notes`));
+    const list = node("div", "crew-notebook-list");
+    const files = state.files.filter((file) => file.author === person);
+    if (!files.length) list.append(node("p", "crew-notebook-empty", "No notes pushed yet."));
+    for (const file of files) {
+      const button = node("button", "crew-note");
+      button.type = "button";
+      button.dataset.fileBranch = file.branch;
+      button.dataset.filePath = file.path;
+      if (selectedFile?.branch === file.branch && selectedFile?.path === file.path) {
+        button.setAttribute("aria-current", "true");
+      }
+      button.append(node("span", "", file.title), node("small", "", `${file.branch} · ${file.path.split("/").slice(2).join("/")}`));
+      list.append(button);
+    }
+    section.append(list);
+    notebooks.append(section);
+  }
+  if (selectedFile && !state.files.some((file) => file.branch === selectedFile.branch && file.path === selectedFile.path)) {
+    closeMarkdown();
+  }
+}
+
+function closeMarkdown() {
+  selectedFile = null;
+  markdownViewer.hidden = true;
+  markdownBody.replaceChildren();
+  notebooks.querySelectorAll('[aria-current="true"]').forEach((button) => button.removeAttribute("aria-current"));
+}
+
+async function openMarkdown(file) {
+  selectedFile = { branch: file.branch, path: file.path };
+  renderNotebooks();
+  markdownViewer.hidden = false;
+  markdownTitle.textContent = file.title;
+  markdownSource.textContent = `${file.author} / ${file.branch} / ${file.path}`;
+  markdownBody.textContent = "Opening note…";
+  markdownViewer.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  markdownTitle.focus({ preventScroll: true });
+  try {
+    const [{ marked }, { default: DOMPurify }] = await Promise.all([
+      import("https://cdn.jsdelivr.net/npm/marked@18.0.7/lib/marked.esm.js"),
+      import("https://cdn.jsdelivr.net/npm/dompurify@3.4.15/dist/purify.es.mjs"),
+    ]);
+    if (selectedFile?.branch !== file.branch || selectedFile?.path !== file.path) return;
+    marked.setOptions({ gfm: true, breaks: false });
+    markdownBody.innerHTML = DOMPurify.sanitize(marked.parse(file.body), { USE_PROFILES: { html: true } });
+    for (const anchor of markdownBody.querySelectorAll("a[href]")) {
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+    }
+    for (const table of markdownBody.querySelectorAll("table")) {
+      const wrapper = node("div", "table-wrap");
+      table.replaceWith(wrapper);
+      wrapper.append(table);
+    }
+    const diagrams = [];
+    for (const code of markdownBody.querySelectorAll("pre > code.language-mermaid")) {
+      const diagram = node("div", "mermaid", code.textContent);
+      code.parentElement.replaceWith(diagram);
+      diagrams.push(diagram);
+    }
+    if (diagrams.length) {
+      const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs");
+      if (selectedFile?.branch !== file.branch || selectedFile?.path !== file.path) return;
+      mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
+      await mermaid.run({ nodes: diagrams, suppressErrors: true });
+    }
+  } catch (error) {
+    console.error("Markdown reader failed:", error);
+    markdownBody.textContent = file.body;
+    announce("The formatted reader could not load. Showing the Markdown text instead.");
+  }
+}
+
 function renderAll() {
   renderVideos();
   renderLessons();
   renderTasks();
+  renderNotebooks();
 }
 
 async function request(action, values = {}) {
@@ -293,6 +379,7 @@ async function refreshAccess() {
   state.notes = result.notes || [];
   state.tasks = result.tasks || [];
   state.checks = result.checks || [];
+  state.files = result.files || [];
   setAccess(result.name);
 }
 
@@ -311,12 +398,24 @@ function setAccess(name) {
   signedIn.hidden = !name;
   signedInName.textContent = name || "";
   learningContent.hidden = !canEdit;
-  document.querySelector("#refresh-button").disabled = !canEdit;
+  document.querySelector("#refresh-button").hidden = !canEdit;
   accessCopy.textContent = canEdit
     ? "Shared changes save for the whole crew."
     : "Choose your name and enter your password.";
   showEditorControls();
 }
+
+notebooks.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-file-path]");
+  if (!button) return;
+  const file = state.files.find((item) => item.branch === button.dataset.fileBranch && item.path === button.dataset.filePath);
+  if (file) openMarkdown(file);
+});
+
+document.querySelector("#markdown-close-button").addEventListener("click", () => {
+  closeMarkdown();
+  document.querySelector("#crew-library-heading").focus();
+});
 
 signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -328,13 +427,19 @@ signInForm.addEventListener("submit", async (event) => {
   try {
     await request("login", { name: memberName.value, password: memberPassword.value });
     memberPassword.value = "";
-    await refreshAccess();
-    announce(`Signed in as ${memberName.value}.`);
   } catch (error) {
     signInError.textContent = error.message;
     signInError.hidden = false;
     memberPassword.setAttribute("aria-invalid", "true");
     memberPassword.focus();
+    button.disabled = false;
+    return;
+  }
+  try {
+    await refreshAccess();
+    announce(`Signed in as ${memberName.value}.`);
+  } catch (error) {
+    report(error);
   } finally {
     button.disabled = false;
   }
@@ -354,7 +459,6 @@ document.querySelector("#sign-out-button").addEventListener("click", async () =>
 });
 
 document.querySelector("#refresh-button").addEventListener("click", async () => {
-  if (!canEdit) return;
   try {
     await refreshAccess();
     announce("Board refreshed.");
@@ -443,7 +547,7 @@ lessonFolders.addEventListener("click", async (event) => {
     noteBody.value = note.body;
     noteSave.textContent = "update note";
     noteCancel.hidden = false;
-    noteForm.scrollIntoView({ block: "start", behavior: "smooth" });
+    noteForm.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     noteTitle.focus();
     return;
   }
@@ -511,8 +615,9 @@ async function start() {
     await refreshAccess();
     announce(canEdit ? "Shared board is ready." : "Sign in to open studies.");
   } catch (error) {
-    accessCopy.textContent = "Studies sign-in is waiting for the server setup.";
+    accessCopy.textContent = "The studies board could not load.";
     signInForm.hidden = true;
+    document.querySelector("#refresh-button").hidden = false;
     report(error);
   }
 }

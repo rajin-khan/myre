@@ -1,6 +1,6 @@
-# myre
+[![myre vision board: a little system of our own](site/banner.png)](https://myre-os.vercel.app/)
 
-![myre banner](site/banner.png)
+# myre
 
 myre is a for-fun operating system project by groceryboix. We want to learn how computers work, try things ourselves, and keep building from what we learn.
 

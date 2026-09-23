@@ -85,13 +85,14 @@ async function database(table, method = "GET", query = {}, body) {
 }
 
 async function readBoard() {
-  const [videos, notes, tasks, checks] = await Promise.all([
+  const [videos, notes, tasks, checks, files] = await Promise.all([
     database("myre_videos", "GET", { select: "id,title,created_at", order: "created_at.desc" }),
     database("myre_notes", "GET", { select: "id,folder,title,body,created_at", order: "created_at.desc" }),
     database("myre_tasks", "GET", { select: "id,title,assignee,status,created_at", order: "created_at.desc" }),
     database("myre_checks", "GET", { select: "item_key,person_id,checked" }),
+    database("myre_learning_files", "GET", { select: "branch,path,author,title,body,commit_sha,updated_at", order: "updated_at.desc" }),
   ]);
-  return { videos, notes, tasks, checks };
+  return { videos, notes, tasks, checks, files };
 }
 
 async function changeBoard(action, input) {

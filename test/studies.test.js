@@ -83,7 +83,8 @@ test("three-name password gate protects the board and writes", async () => {
     await handler(request("GET", null, cookie), result);
     assert.equal(result.statusCode, 200);
     assert.equal(result.body.name, "rajin");
-    assert.equal(calls.length, 4);
+    assert.equal(calls.length, 5);
+    assert.deepEqual(result.body.files, []);
     assert.ok(calls.every((call) => call.options.headers.apikey === "server-only-test-key"));
 
     result = response();

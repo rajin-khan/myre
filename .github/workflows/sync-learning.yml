@@ -1,0 +1,26 @@
+name: Sync learning notes
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'learning/**'
+      - 'scripts/sync-learning.mjs'
+      - '.github/workflows/sync-learning.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: learning-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send branch snapshot to myre
+        run: node scripts/sync-learning.mjs

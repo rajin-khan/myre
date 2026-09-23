@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>myre os</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 1200px; height: 630px; margin: 0; }
+    body { overflow: hidden; color: #f3efe4; background: #f3efe4; font-family: "Avenir Next", "Segoe UI", sans-serif; }
+    .frame { position: relative; width: 1200px; height: 630px; padding: 25px; background-image: radial-gradient(#d7d1c2 .75px, transparent .75px); background-size: 6px 6px; }
+    .board { display: grid; grid-template-columns: 750px 375px; grid-template-rows: 400px 150px; gap: 14px; width: 100%; height: 100%; }
+    .hero, .crew, .step, .tag { position: relative; overflow: hidden; border-radius: 8px; box-shadow: 0 3px 0 #22261f21; }
+    .hero { grid-row: span 2; padding: 37px 42px; background: #183d31; }
+    .hero::before { position: absolute; right: -140px; top: -180px; width: 570px; height: 570px; content: ""; border: 1px solid #d7f06a66; border-radius: 50%; }
+    .hero::after { position: absolute; right: -54px; top: -86px; width: 420px; height: 420px; content: ""; border: 1px solid #f3efe480; border-radius: 50%; }
+    .eyebrow, .footer, .small { font: 15px "SF Mono", "Liberation Mono", monospace; letter-spacing: .075em; text-transform: uppercase; }
+    .eyebrow { color: #d7f06a; }
+    h1 { position: relative; z-index: 1; margin: 90px 0 0 -10px; color: #d7f06a; font-size: 185px; line-height: .72; letter-spacing: -.12em; font-weight: 700; }
+    .subtitle { position: relative; z-index: 1; width: 470px; margin: 44px 0 0; font: 32px/1.05 "Iowan Old Style", Georgia, serif; }
+    .footer { position: absolute; right: 42px; bottom: 34px; left: 42px; display: flex; justify-content: space-between; color: #e6e9d7a8; }
+    .crew { padding: 28px; color: #22261f; background: #f08163; }
+    .crew h2 { margin: 58px 0 0; font: 45px/.95 "Iowan Old Style", Georgia, serif; letter-spacing: -.06em; transform: rotate(-2deg); }
+    .crew .small { color: #22261f; }
+    .dots { display: flex; gap: 8px; margin-top: 45px; }
+    .dots i { width: 42px; height: 42px; border: 2px solid #f08163; border-radius: 50%; background: #f4ca54; }
+    .dots i:nth-child(2) { background: #7e9cff; }
+    .dots i:nth-child(3) { background: #ddd4f4; }
+    .step { padding: 23px 28px; color: #22261f; background: #f4ca54; }
+    .step p { margin: 18px 0 0; font: 31px/.95 "Iowan Old Style", Georgia, serif; letter-spacing: -.045em; }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <div class="board">
+      <section class="hero">
+        <span class="eyebrow">01 / A LITTLE SYSTEM OF OUR OWN</span>
+        <h1>myre<span style="color:#f08163">.</span></h1>
+        <p class="subtitle">We're building myre to find out how computers work.</p>
+        <div class="footer"><span>ARCH-BASED / BUILT SLOWLY</span><span>GROCERYBOIX ✳</span></div>
+      </section>
+      <section class="crew">
+        <span class="small">02 / THE CREW</span>
+        <h2>three friends,<br>one very big rabbit hole.</h2>
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      </section>
+      <section class="step">
+        <span class="small">03 / THE IDEA</span>
+        <p>learn. test. make.<br>see what happens.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

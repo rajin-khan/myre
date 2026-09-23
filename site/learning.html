@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3efe4">
     <meta name="description" content="The myre crew's shared place for learning, experiments, notes, and small tasks.">
-    <title>myre</title>
+    <title>myre os</title>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="myre os">
+    <meta property="og:description" content="The groceryboix notebook for learning and building myre.">
+    <meta property="og:image" content="https://myre-os.vercel.app/banner.png">
+    <meta property="og:image:width" content="2644">
+    <meta property="og:image:height" content="1692">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://myre-os.vercel.app/banner.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -31,15 +39,19 @@
       <section class="study-access" aria-label="Shared editing">
         <p id="access-copy">Loading the shared board...</p>
         <form id="sign-in-form" hidden>
-          <label for="member-name">Name</label>
-          <select id="member-name" name="username" autocomplete="username" required>
-            <option value="" selected disabled>choose your name</option>
-            <option value="rajin">rajin</option>
-            <option value="samiyeel">samiyeel</option>
-            <option value="saumik">saumik</option>
-          </select>
-          <label for="member-password">Password</label>
-          <input id="member-password" name="password" type="password" autocomplete="current-password" aria-describedby="sign-in-error" required>
+          <div class="sign-in-field">
+            <label for="member-name">Name</label>
+            <select id="member-name" name="username" autocomplete="username" required>
+              <option value="" selected disabled>choose your name</option>
+              <option value="rajin">rajin</option>
+              <option value="samiyeel">samiyeel</option>
+              <option value="saumik">saumik</option>
+            </select>
+          </div>
+          <div class="sign-in-field">
+            <label for="member-password">Password</label>
+            <input id="member-password" name="password" type="password" autocomplete="current-password" aria-describedby="sign-in-error" required>
+          </div>
           <button class="pin-button" type="submit">sign in</button>
         </form>
         <small class="field-error" id="sign-in-error" hidden></small>
@@ -47,7 +59,7 @@
           <span id="signed-in-name"></span>
           <button type="button" id="sign-out-button">sign out</button>
         </div>
-        <button class="plain-button" id="refresh-button" type="button" disabled>refresh</button>
+        <button class="plain-button" id="refresh-button" type="button" hidden>refresh</button>
       </section>
 
       <div class="learning-content" id="learning-content" hidden>
@@ -103,6 +115,22 @@
             <div class="lesson-folders" id="lesson-folders"></div>
           </section>
         </div>
+
+        <section class="learning-section crew-library" aria-labelledby="crew-library-heading">
+          <h2 id="crew-library-heading" tabindex="-1">crew notebooks</h2>
+          <p class="learning-section-note">Markdown notes from our Git branches. Pick one to read it here.</p>
+          <div class="crew-notebooks" id="crew-notebooks"></div>
+          <section class="markdown-viewer" id="markdown-viewer" aria-labelledby="markdown-viewer-title" hidden>
+            <header class="markdown-viewer-header">
+              <div>
+                <p class="markdown-viewer-kicker" id="markdown-viewer-source"></p>
+                <h3 id="markdown-viewer-title" tabindex="-1"></h3>
+              </div>
+              <button class="plain-button" id="markdown-close-button" type="button">close note</button>
+            </header>
+            <article class="markdown-body" id="markdown-body"></article>
+          </section>
+        </section>
 
         <section class="kanban" aria-labelledby="kanban-heading">
           <div class="kanban-heading">

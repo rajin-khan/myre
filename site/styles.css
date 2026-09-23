@@ -252,6 +252,77 @@ h1, h2, p { margin-top: 0; }
 .skip-link { position: absolute; z-index: 10; inset-inline-start: -9999px; top: 8px; padding: 10px 12px; border: 2px solid var(--green); border-radius: 3px; color: var(--ink); background: var(--paper); font: 10px var(--mono); }
 .skip-link:focus { inset-inline-start: 16px; }
 
+/* Studies keeps the board's visual language, with a calmer form and reading surface. */
+.learning-page { min-height: 100vh; display: flex; flex-direction: column; }
+.learning-page-header { flex: 0 0 auto; }
+.learning-page .learning-main { flex: 1 0 auto; width: min(1240px, calc(100% - 64px)); }
+.learning-page .learning-page-footer { flex: 0 0 auto; width: min(1240px, calc(100% - 64px)); }
+.learning-page .study-access { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px 24px; padding-block: 20px; }
+.learning-page .study-access p { font-size: 14px; line-height: 1.5; }
+.study-access form { display: grid; grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) auto; align-items: end; gap: 10px; width: min(100%, 560px); }
+.sign-in-field { display: grid; min-width: 0; gap: 6px; }
+.sign-in-field label { font: 11px var(--mono); }
+.study-access .sign-in-field input, .study-access .sign-in-field select { width: 100%; min-width: 0; min-height: 44px; font-size: 16px; }
+.study-access form .pin-button { min-height: 44px; white-space: nowrap; }
+.study-access .field-error { grid-column: 2; margin: -3px 0 0; color: #743723; font: 12px/1.4 var(--sans); }
+.study-access #refresh-button { justify-self: end; min-height: 44px; font-size: 11px; }
+.study-access .signed-in { font-size: 12px; }
+.study-access .signed-in button { min-height: 44px; font-size: 11px; }
+.learning-status { font-size: 11px; }
+.learning-page .learning-section-note, .learning-page .kanban-heading p { font-size: 13px; }
+.learning-page .field-group label, .learning-page .field-group small, .learning-page .progress-checks legend { font-size: 11px; }
+.learning-page .field-group input, .learning-page .field-group select, .learning-page .field-group textarea { font-size: 14px; }
+.learning-page .field-group textarea { line-height: 1.55; }
+.learning-page .pin-button, .learning-page .plain-button, .learning-page .video-remove, .learning-page .task-remove { font-size: 11px; }
+.learning-page .video-item-heading h3, .learning-page .lesson-item h4, .learning-page .note-summary, .learning-page .kanban-task-title { font-size: 13px; }
+.learning-page .progress-person, .learning-page .task-owner, .learning-page .lesson-item p, .learning-page .assignee-key li { font-size: 11px; }
+.learning-page .task-control { font-size: 12px; }
+.learning-page .note-body { font-size: 12px; }
+.learning-page .lesson-folder-heading h3 { font-size: 13px; }
+.learning-page .lesson-folder-heading code { font-size: 10px; }
+.learning-page .lesson-link { font-size: 10px; }
+.learning-page .back-link { font-size: 11px; }
+.learning-page .kanban-column h3 { font-size: 11px; }
+.learning-page .empty-videos, .learning-page .empty-column { font-size: 12px; }
+.crew-library { margin-top: 14px; }
+.crew-notebooks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.crew-notebook { min-width: 0; padding: 12px; border: 1px solid rgb(34 38 31 / 25%); border-radius: 3px; background: rgb(255 247 214 / 55%); }
+.crew-notebook h3 { margin: 0 0 10px; font: 600 16px var(--sans); text-transform: lowercase; }
+.crew-notebook-list { display: grid; gap: 7px; }
+.crew-note { width: 100%; min-height: 52px; padding: 9px 10px; border: 1px solid rgb(34 38 31 / 20%); border-radius: 3px; color: var(--ink); background: #fffdf5; text-align: left; cursor: pointer; }
+.crew-note span { display: block; font: 600 13px/1.35 var(--sans); overflow-wrap: anywhere; }
+.crew-note small { display: block; margin-top: 4px; color: #5a5c50; font: 10px/1.35 var(--mono); overflow-wrap: anywhere; }
+.crew-note:hover { border-color: var(--green); }
+.crew-note:focus-visible, #markdown-close-button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.crew-note[aria-current="true"] { border-color: var(--green); background: #e8edda; }
+.crew-notebook-empty { margin: 0; color: #5a5c50; font: 12px/1.45 var(--sans); }
+.markdown-viewer { margin-top: 18px; padding: clamp(14px, 2vw, 26px); border: 1px solid rgb(34 38 31 / 25%); border-radius: 3px; background: #fffdf5; }
+.markdown-viewer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid var(--line); }
+.markdown-viewer-kicker { margin: 0 0 6px; color: #5a5c50; font: 11px/1.4 var(--mono); overflow-wrap: anywhere; }
+.markdown-viewer h3 { margin: 0; font: 500 clamp(25px, 3vw, 36px)/1.05 var(--serif); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.markdown-body { max-width: 78ch; padding-top: 12px; font: 16px/1.7 var(--sans); overflow-wrap: anywhere; }
+.markdown-body :is(h1, h2, h3, h4) { margin: 1.5em 0 .55em; line-height: 1.2; letter-spacing: -.025em; }
+.markdown-body h1 { font-size: 2em; }
+.markdown-body h2 { font-size: 1.55em; }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body blockquote, .markdown-body pre, .markdown-body table { margin-block: .9em; }
+.markdown-body :is(ul, ol) { padding-inline-start: 1.5em; }
+.markdown-body li + li { margin-top: .25em; }
+.markdown-body a { color: #194d3a; text-underline-offset: 3px; }
+.markdown-body a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.markdown-body blockquote { margin-inline: 0; padding: .15em 1em; border-inline-start: 3px solid var(--coral); color: #50574c; background: #f8f1dd; }
+.markdown-body :not(pre) > code { padding: .12em .3em; border-radius: 2px; background: #e8edda; font: .85em/1.5 var(--mono); }
+.markdown-body pre { max-width: 100%; overflow-x: auto; padding: 15px; border-radius: 3px; color: #e6e9d7; background: #20271f; font: 13px/1.55 var(--mono); }
+.markdown-body pre code { font: inherit; }
+.markdown-body .mermaid { max-width: 100%; overflow-x: auto; padding: 15px; border: 1px solid var(--line); border-radius: 3px; background: #f8f5e9; }
+.markdown-body .mermaid svg { max-width: 100%; height: auto; }
+.markdown-body img { max-width: 100%; height: auto; }
+.markdown-body .table-wrap { max-width: 100%; overflow-x: auto; }
+.markdown-body table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.markdown-body :is(th, td) { padding: 7px 10px; border: 1px solid var(--line); text-align: left; }
+.markdown-body th { background: #e8edda; }
+.markdown-body hr { border: 0; border-top: 1px solid var(--line); }
+
 .game-night { grid-column: span 4; min-height: 249px; color: #eef0d9; background: #334ba0; }
 .game-spark { color: var(--lime); font-size: 18px; }
 .game-night h2 { position: relative; z-index: 1; margin: 21px 0 5px; font-size: 31px; line-height: .91; letter-spacing: -.06em; }
@@ -342,6 +413,13 @@ h1, h2, p { margin-top: 0; }
   .sticky-note { min-height: 220px; }
   .footer { flex-wrap: wrap; justify-content: space-between; padding-block: 14px; }
   .footer span:nth-child(2) { order: 3; flex-basis: 100%; }
+  .learning-page .learning-main, .learning-page .learning-page-footer { width: min(100% - 32px, 560px); }
+  .learning-page .study-access { grid-template-columns: 1fr; }
+  .study-access form { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .study-access form .pin-button { grid-column: 1 / -1; justify-self: start; }
+  .study-access .field-error { grid-column: 1; }
+  .study-access #refresh-button { justify-self: start; }
+  .crew-notebooks { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 390px) {
@@ -367,6 +445,11 @@ h1, h2, p { margin-top: 0; }
   .learning-topbar .brand { gap: 7px; font-size: 16px; }
   .back-link { gap: 5px; font-size: 8px; }
   .note-fields { grid-template-columns: 1fr; }
+  .learning-page .learning-main, .learning-page .learning-page-footer { width: calc(100% - 24px); }
+  .study-access form { grid-template-columns: 1fr; }
+  .study-access form .pin-button { grid-column: 1; }
+  .markdown-viewer-header { flex-wrap: wrap; }
+  .learning-page .field-group input, .learning-page .field-group select, .learning-page .field-group textarea { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
