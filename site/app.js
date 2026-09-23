@@ -33,7 +33,6 @@ const FOLDERS = [
 ];
 
 const state = { videos: [], notes: [], tasks: [], checks: [] };
-const config = window.MYRE_SUPABASE || {};
 const videoForm = document.querySelector("#video-form");
 const videoUrl = document.querySelector("#video-url");
 const videoTitle = document.querySelector("#video-title");
@@ -51,13 +50,15 @@ const taskTitle = document.querySelector("#task-title");
 const taskAssignee = document.querySelector("#task-assignee");
 const taskColumns = document.querySelector(".kanban-columns");
 const signInForm = document.querySelector("#sign-in-form");
+const memberName = document.querySelector("#member-name");
+const memberPassword = document.querySelector("#member-password");
+const signInError = document.querySelector("#sign-in-error");
 const learningContent = document.querySelector("#learning-content");
 const signedIn = document.querySelector("#signed-in");
-const signedInEmail = document.querySelector("#signed-in-email");
+const signedInName = document.querySelector("#signed-in-name");
 const accessCopy = document.querySelector("#access-copy");
 const status = document.querySelector("#learning-status");
 
-let db = null;
 let canEdit = false;
 let editingNoteId = null;
 
@@ -258,105 +259,110 @@ function renderAll() {
   renderTasks();
 }
 
-async function loadAll() {
-  const [videos, notes, tasks, checks] = await Promise.all([
-    db.from("myre_videos").select("id,title,created_at").order("created_at", { ascending: false }),
-    db.from("myre_notes").select("id,folder,title,body,created_at").order("created_at", { ascending: false }),
-    db.from("myre_tasks").select("id,title,assignee,status,created_at").order("created_at", { ascending: false }),
-    db.from("myre_checks").select("item_key,person_id,checked"),
-  ]);
-  const error = [videos, notes, tasks, checks].find((result) => result.error)?.error;
-  if (error) throw error;
-  state.videos = videos.data;
-  state.notes = notes.data;
-  state.tasks = tasks.data;
-  state.checks = checks.data;
-  renderAll();
+async function request(action, values = {}) {
+  let response;
+  try {
+    response = await fetch("/api/studies", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...values }),
+    });
+  } catch {
+    throw new Error("Could not reach the studies server.");
+  }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 401 && action !== "login") await refreshAccess().catch(() => {});
+    throw new Error(result.error || "Please try again.");
+  }
+  return result;
 }
 
-async function save(query, message) {
-  const { error } = await query;
-  if (error) throw error;
-  await loadAll();
+async function refreshAccess() {
+  let response;
+  try {
+    response = await fetch("/api/studies", { credentials: "same-origin", cache: "no-store" });
+  } catch {
+    throw new Error("Could not reach the studies server.");
+  }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || "Could not load studies.");
+  canEdit = Boolean(result.name);
+  state.videos = result.videos || [];
+  state.notes = result.notes || [];
+  state.tasks = result.tasks || [];
+  state.checks = result.checks || [];
+  setAccess(result.name);
+}
+
+async function save(action, values, message) {
+  await request(action, values);
+  await refreshAccess();
   announce(message);
 }
 
 function report(error) {
-  announce(`Couldn't save that change. ${error.message || "Please try again."}`);
+  announce(error.message || "Please try again.");
 }
 
-function setAccess(session) {
-  signInForm.hidden = Boolean(session);
-  signedIn.hidden = !session;
-  signedInEmail.textContent = session?.user?.email || "";
+function setAccess(name) {
+  signInForm.hidden = Boolean(name);
+  signedIn.hidden = !name;
+  signedInName.textContent = name || "";
   learningContent.hidden = !canEdit;
   document.querySelector("#refresh-button").disabled = !canEdit;
   accessCopy.textContent = canEdit
     ? "Shared changes save for the whole crew."
-    : session
-      ? "This email isn't on the crew list."
-      : "Crew members can sign in to see and edit studies.";
+    : "Choose your name and enter your password.";
   showEditorControls();
-}
-
-async function refreshAccess() {
-  const { data: { session }, error } = await db.auth.getSession();
-  if (error) throw error;
-  canEdit = false;
-  if (session) {
-    const result = await db.rpc("myre_can_edit");
-    if (result.error) throw result.error;
-    canEdit = result.data === true;
-  }
-  setAccess(session);
-  if (canEdit) await loadAll();
-  else {
-    state.videos = [];
-    state.notes = [];
-    state.tasks = [];
-    state.checks = [];
-    renderAll();
-  }
 }
 
 signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!db || !signInForm.reportValidity()) return;
-  const email = document.querySelector("#editor-email").value.trim().toLowerCase();
+  if (!signInForm.reportValidity()) return;
+  signInError.hidden = true;
+  memberPassword.removeAttribute("aria-invalid");
   const button = signInForm.querySelector("button");
   button.disabled = true;
   try {
-    const redirect = window.location.protocol === "https:" || window.location.protocol === "http:"
-      ? { emailRedirectTo: new URL("learning.html", window.location.href).href }
-      : {};
-    const { error } = await db.auth.signInWithOtp({ email, options: redirect });
-    if (error) throw error;
-    announce(`Check ${email} for a sign-in link.`);
+    await request("login", { name: memberName.value, password: memberPassword.value });
+    memberPassword.value = "";
+    await refreshAccess();
+    announce(`Signed in as ${memberName.value}.`);
   } catch (error) {
-    report(error);
+    signInError.textContent = error.message;
+    signInError.hidden = false;
+    memberPassword.setAttribute("aria-invalid", "true");
+    memberPassword.focus();
   } finally {
     button.disabled = false;
   }
 });
 
+memberPassword.addEventListener("input", () => {
+  memberPassword.removeAttribute("aria-invalid");
+  signInError.hidden = true;
+});
+
 document.querySelector("#sign-out-button").addEventListener("click", async () => {
-  if (!db) return;
-  const { error } = await db.auth.signOut();
-  if (error) return report(error);
-  await refreshAccess();
-  announce("Signed out.");
+  try {
+    await request("logout");
+    await refreshAccess();
+    announce("Signed out.");
+  } catch (error) { report(error); }
 });
 
 document.querySelector("#refresh-button").addEventListener("click", async () => {
-  if (!db || !canEdit) return;
+  if (!canEdit) return;
   try {
-    await loadAll();
+    await refreshAccess();
     announce("Board refreshed.");
   } catch (error) { report(error); }
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (db && canEdit && !document.hidden) loadAll().catch(report);
+  if (canEdit && !document.hidden) refreshAccess().catch(report);
 });
 
 videoForm.addEventListener("submit", async (event) => {
@@ -374,7 +380,7 @@ videoForm.addEventListener("submit", async (event) => {
   }
   const title = videoTitle.value.trim().slice(0, 100) || "YouTube video";
   try {
-    await save(db.from("myre_videos").insert({ id: video.id, title }), `Pinned ${title}.`);
+    await save("video.add", { id: video.id, title }, `Pinned ${title}.`);
     videoForm.reset();
     videoUrl.focus();
   } catch (error) { report(error); }
@@ -391,7 +397,7 @@ videoList.addEventListener("click", async (event) => {
   const video = state.videos.find((item) => item.id === button.dataset.removeVideo);
   if (!video || !window.confirm(`Remove ${video.title}?`)) return;
   try {
-    await save(db.from("myre_videos").delete().eq("id", video.id), `Removed ${video.title}.`);
+    await save("video.remove", { id: video.id }, `Removed ${video.title}.`);
   } catch (error) { report(error); }
 });
 
@@ -405,10 +411,9 @@ noteForm.addEventListener("submit", async (event) => {
   };
   if (!values.title || !values.body) return;
   try {
-    const query = editingNoteId
-      ? db.from("myre_notes").update(values).eq("id", editingNoteId)
-      : db.from("myre_notes").insert(values);
-    await save(query, editingNoteId ? `Updated ${values.title}.` : `Saved ${values.title}.`);
+    await save(editingNoteId ? "note.update" : "note.add",
+      editingNoteId ? { ...values, id: editingNoteId } : values,
+      editingNoteId ? `Updated ${values.title}.` : `Saved ${values.title}.`);
     noteForm.reset();
     editingNoteId = null;
     noteCancel.hidden = true;
@@ -444,7 +449,7 @@ lessonFolders.addEventListener("click", async (event) => {
   }
   if (!window.confirm(`Remove ${note.title}?`)) return;
   try {
-    await save(db.from("myre_notes").delete().eq("id", note.id), `Removed ${note.title}.`);
+    await save("note.remove", { id: note.id }, `Removed ${note.title}.`);
   } catch (error) { report(error); }
 });
 
@@ -454,7 +459,7 @@ taskForm.addEventListener("submit", async (event) => {
   const title = taskTitle.value.trim().slice(0, 120);
   if (!title) return;
   try {
-    await save(db.from("myre_tasks").insert({ title, assignee: taskAssignee.value, status: "todo" }), `Added ${title}.`);
+    await save("task.add", { title, assignee: taskAssignee.value }, `Added ${title}.`);
     taskForm.reset();
     taskTitle.focus();
   } catch (error) { report(error); }
@@ -468,7 +473,7 @@ taskColumns.addEventListener("change", async (event) => {
   if (!task) return;
   const field = input.dataset.taskAssignee ? "assignee" : "status";
   try {
-    await save(db.from("myre_tasks").update({ [field]: input.value }).eq("id", id), `Updated ${task.title}.`);
+    await save("task.update", { id, field, value: input.value }, `Updated ${task.title}.`);
   } catch (error) {
     renderTasks();
     report(error);
@@ -481,7 +486,7 @@ taskColumns.addEventListener("click", async (event) => {
   const task = state.tasks.find((item) => item.id === button.dataset.removeTask);
   if (!task || !window.confirm(`Remove ${task.title}?`)) return;
   try {
-    await save(db.from("myre_tasks").delete().eq("id", task.id), `Removed ${task.title}.`);
+    await save("task.remove", { id: task.id }, `Removed ${task.title}.`);
   } catch (error) { report(error); }
 });
 
@@ -491,13 +496,8 @@ document.querySelector("#learning-content").addEventListener("change", async (ev
   const { progressKey, personId } = input.dataset;
   input.disabled = true;
   try {
-    await save(
-      db.from("myre_checks").upsert(
-        { item_key: progressKey, person_id: personId, checked: input.checked },
-        { onConflict: "item_key,person_id" },
-      ),
-      `Saved ${personId}'s progress.`,
-    );
+    await save("check.set", { item_key: progressKey, person_id: personId, checked: input.checked },
+      `Saved ${personId}'s progress.`);
   } catch (error) {
     input.disabled = false;
     input.checked = !input.checked;
@@ -507,20 +507,12 @@ document.querySelector("#learning-content").addEventListener("change", async (ev
 
 async function start() {
   renderAll();
-  if (!config.url || !config.publishableKey || !window.supabase?.createClient) {
-    accessCopy.textContent = "Shared editing is being set up. The starter lessons are still here.";
-    announce("No shared database is connected yet.");
-    return;
-  }
-  db = window.supabase.createClient(config.url, config.publishableKey);
   try {
     await refreshAccess();
     announce(canEdit ? "Shared board is ready." : "Sign in to open studies.");
-    db.auth.onAuthStateChange(() => {
-      window.setTimeout(() => refreshAccess().catch(report), 0);
-    });
   } catch (error) {
-    accessCopy.textContent = "The shared board could not load.";
+    accessCopy.textContent = "Studies sign-in is waiting for the server setup.";
+    signInForm.hidden = true;
     report(error);
   }
 }

@@ -145,7 +145,7 @@ h1, h2, p { margin-top: 0; }
 .learning-page-header { border-bottom: 1px solid var(--line); }
 .learning-topbar { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .back-link { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; color: #435143; font: 9px var(--mono); text-decoration-thickness: 1px; text-underline-offset: 4px; text-transform: uppercase; }
-.back-link:focus-visible, .learning-page-footer a:focus-visible, .plain-button:focus-visible, .study-access input:focus-visible, .study-access button:focus-visible, .note-summary:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.back-link:focus-visible, .learning-page-footer a:focus-visible, .plain-button:focus-visible, .study-access input:focus-visible, .study-access select:focus-visible, .study-access button:focus-visible, .note-summary:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 .learning-main { padding-block: 30px 12px; }
 .studies-heading { padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 .studies-heading h1 { margin: 7px 0 3px; font-size: clamp(40px, 5vw, 64px); line-height: .95; font-weight: 600; letter-spacing: -.075em; }
@@ -153,9 +153,10 @@ h1, h2, p { margin-top: 0; }
 .study-access { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; padding-block: 12px; border-bottom: 1px solid var(--line); }
 .study-access p { flex: 1 1 250px; margin: 0; color: #55594f; font: 10px/1.4 var(--sans); }
 .study-access form, .signed-in { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
-.study-access label, .signed-in { color: var(--ink); font: 9px var(--mono); }
-.study-access input { min-height: 40px; min-width: min(200px, 100%); padding: 8px 10px; border: 1px solid rgb(34 38 31 / 40%); border-radius: 3px; background: #fffaf0; font: 11px var(--sans); }
-.study-access .pin-button { min-height: 40px; margin: 0; }
+.study-access label, .signed-in { color: var(--ink); font: 10px var(--mono); }
+.study-access input, .study-access select { min-height: 44px; min-width: min(150px, 100%); padding: 8px 10px; border: 1px solid rgb(34 38 31 / 40%); border-radius: 3px; background: #fffaf0; color: var(--ink); font: 12px var(--sans); }
+.study-access .field-error { flex-basis: 100%; }
+.study-access .pin-button { min-height: 44px; margin: 0; }
 .signed-in button { min-height: 40px; padding-inline: 9px; border: 1px solid rgb(34 38 31 / 35%); border-radius: 3px; color: var(--ink); background: #fffaf0; font: 9px var(--mono); cursor: pointer; }
 .learning-content { padding-block: 18px 4px; }
 .learning-page .learning-section { min-width: 0; padding: 18px; border: 1px solid rgb(34 38 31 / 20%); border-radius: 4px; background: rgb(255 250 233 / 80%); }

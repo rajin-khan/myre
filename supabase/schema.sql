@@ -1,5 +1,5 @@
--- myre studies. Apply once to a new Supabase project in the SQL editor.
--- Keep studies private until the three crew emails are added to myre_editors.
+-- Original myre studies schema. For name/password access, apply
+-- lock_direct_access.sql afterward to close the old browser grants.
 
 create table public.myre_editors (
   email text primary key check (email = lower(email) and length(email) <= 320)

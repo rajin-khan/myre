@@ -31,18 +31,26 @@
       <section class="study-access" aria-label="Shared editing">
         <p id="access-copy">Loading the shared board...</p>
         <form id="sign-in-form" hidden>
-          <label for="editor-email">Crew email</label>
-          <input id="editor-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
-          <button class="pin-button" type="submit">send sign-in link</button>
+          <label for="member-name">Name</label>
+          <select id="member-name" name="username" autocomplete="username" required>
+            <option value="" selected disabled>choose your name</option>
+            <option value="rajin">rajin</option>
+            <option value="samiyeel">samiyeel</option>
+            <option value="saumik">saumik</option>
+          </select>
+          <label for="member-password">Password</label>
+          <input id="member-password" name="password" type="password" autocomplete="current-password" aria-describedby="sign-in-error" required>
+          <button class="pin-button" type="submit">sign in</button>
         </form>
+        <small class="field-error" id="sign-in-error" hidden></small>
         <div class="signed-in" id="signed-in" hidden>
-          <span id="signed-in-email"></span>
+          <span id="signed-in-name"></span>
           <button type="button" id="sign-out-button">sign out</button>
         </div>
         <button class="plain-button" id="refresh-button" type="button" disabled>refresh</button>
       </section>
 
-      <div class="learning-content" id="learning-content">
+      <div class="learning-content" id="learning-content" hidden>
         <div class="learning-columns">
           <section class="learning-section" aria-labelledby="video-heading">
             <h2 id="video-heading">YouTube pile</h2>
@@ -142,16 +150,14 @@
           </div>
         </section>
 
-        <p class="learning-status" id="learning-status" role="status" aria-live="polite"></p>
       </div>
+      <p class="learning-status" id="learning-status" role="status" aria-live="polite"></p>
     </main>
 
     <footer class="footer learning-page-footer page-shell">
       <span>myre / build 000</span>
       <span><a href="index.html#top">back to groceryboix <span class="footer-star" aria-hidden="true">✳</span></a></span>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" defer></script>
-    <script src="config.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

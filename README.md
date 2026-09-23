@@ -10,9 +10,10 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 
 - `site/index.html` is the project vision board. Card 6 links to its own page instead of opening inside the grid.
 - `site/learning.html` is the studies page for videos, notes, checklists, and the team board.
-- `site/app.js` saves those shared items in Supabase. `site/config.js` holds the public project URL and publishable key. Never put a secret or service-role key in browser code.
+- `site/app.js` runs the studies page. `site/api/studies.js` checks the three names and passwords on the server, then reads and writes Supabase. No database key or password goes in browser code.
 - `site/learning/` contains the starter Markdown lessons, grouped by what we're learning, testing, and making.
 - `supabase/schema.sql` creates the studies tables and access rules in a new Supabase project.
+- `supabase/lock_direct_access.sql` closes the old browser-to-Supabase access path.
 - `supabase/heartbeat.sql` starts a daily database-side write, including before Vercel deployment.
 - `site/api/heartbeat.js` and `site/vercel.json` schedule a private daily database write after deployment.
 - `site/banner.html` and `site/banner.css` make the screenshot-ready banner.
@@ -24,16 +25,20 @@ As new cards get their own material, keep the board quick to scan and link each 
 
 ## Studies setup
 
-The tables and access rules in `supabase/schema.sql` have been applied to the free `myre` project. Row-level security is on for every table. Studies are private: only signed-in email addresses listed in `myre_editors` can read or change videos, notes, tasks, and checklists. The crew emails still need to be added. To do that in the Supabase SQL editor, use `insert into public.myre_editors (email) values ('person@example.com');` for each crew member. The email must be lowercase.
+The tables in `supabase/schema.sql` are in the free `myre` project, with row-level security on every table. `supabase/lock_direct_access.sql` disables direct browser access. The old editor-email table remains unused. The studies page now has three fixed names, each with its own password. The server checks the password and keeps the session in a signed, HTTP-only cookie. There is no Google sign-in or email flow.
 
-Sign-in uses Supabase's default magic-link email. Its built-in email sender only delivers to members of the Supabase organization and is heavily rate-limited. For the three friends to sign in without granting them dashboard access, configure a custom SMTP sender in Supabase Authentication → Emails → SMTP Settings. The site does not require a package install or build step.
+For Vercel, choose `site` as the Root Directory and the static/Other framework option. There is no package install or build step. The studies page needs its `/api/studies` Vercel Function, so opening `learning.html` as a `file://` page will not sign you in.
 
-For Vercel, choose `site` as the Root Directory and the static/Other framework option. Once it is deployed, set Supabase Authentication → URL Configuration to the production site URL and allow the exact `https://your-site.example/learning.html` redirect. Test the email link on that deployed site. A local `file://` copy cannot complete the email redirect.
+Set these server-side Vercel environment variables before deploying:
 
-The database-side heartbeat in `supabase/heartbeat.sql` runs daily at 08:00 UTC, even before deployment. The separate external heartbeat in `site/vercel.json` also runs at 08:00 UTC, but only from a production Vercel deployment. For the external heartbeat, set these *server-side* Vercel environment variables before deploying:
+- `MYRE_PASSWORD_RAJIN`, `MYRE_PASSWORD_SAMIYEEL`, `MYRE_PASSWORD_SAUMIK`: different, random passwords of at least 16 characters. Share each one privately with its owner. Changing one password signs that person out.
+- `MYRE_SESSION_SECRET`: a separate random string of at least 32 characters. Changing it signs everyone out.
+- `SUPABASE_SERVICE_ROLE_KEY`: the project's service-role key from Supabase. The studies function and external heartbeat need it. Keep it only in Vercel's encrypted environment settings, never in Git or a public page.
+- `CRON_SECRET`: a separate random string of at least 16 characters for Vercel's scheduled heartbeat endpoint.
 
-- `CRON_SECRET`: a random secret of at least 16 characters. Vercel sends it to the scheduled endpoint as a bearer token.
-- `SUPABASE_SERVICE_ROLE_KEY`: the project's service-role key from Supabase. Keep it only in Vercel's encrypted environment settings; never add it to `site/config.js`, Git, or a public page.
+The site will show a setup message until these variables are present in a production deployment. The server does not include password reset or brute-force protection, so use long random passwords and change one if it is shared accidentally.
+
+The database-side heartbeat in `supabase/heartbeat.sql` runs daily at 08:00 UTC, even before deployment. The separate external heartbeat in `site/vercel.json` also runs at 08:00 UTC, but only from a production Vercel deployment.
 
 After deployment, check Vercel Cron Jobs and logs, then confirm the `last_ping_at` value in the private `myre_heartbeat` row changes. Supabase Cron's history shows whether the internal job ran. The internal write may not count as user activity, and even an external daily request is **not a guarantee** against Supabase inactivity pausing.
 
