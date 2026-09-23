@@ -1,0 +1,8 @@
+# Local credentials and deployment state
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Supabase CLI cache
+supabase/.temp/
