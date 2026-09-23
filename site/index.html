@@ -66,23 +66,53 @@
           <p class="card-caption">first build: make the machine say hello.</p>
         </article>
 
-        <details class="card layers" id="learning-hub">
-          <summary class="layers-summary">
-            <span class="card-topline"><span class="card-index">04 / OUR FIRST GOAL</span><span class="layer-arrow" aria-hidden="true">↗</span></span>
-            <h2>learn first.<br>test &amp; make next.</h2>
-            <span class="layer-stack" aria-label="A computer has layers, from hardware up to the desktop">
-              <span class="layer layer-desktop">desktop <i>the part we see</i></span>
-              <span class="layer layer-shell">shell <i>where we ask</i></span>
-              <span class="layer layer-kernel">kernel <i>the core rules</i></span>
-              <span class="layer layer-hardware">hardware <i>the actual machine</i></span>
+        <article class="card layers">
+          <div class="card-topline"><span class="card-index">04 / WHAT WE'LL LEARN</span><span class="layer-arrow" aria-hidden="true">↓</span></div>
+          <h2>one layer<br>at a time.</h2>
+          <div class="layer-stack" aria-label="Learning path from hardware to desktop">
+            <span class="layer layer-desktop">desktop <i>the part we see</i></span>
+            <span class="layer layer-shell">shell <i>where we ask</i></span>
+            <span class="layer layer-kernel">kernel <i>the core rules</i></span>
+            <span class="layer layer-hardware">hardware <i>the actual machine</i></span>
+          </div>
+          <p class="layers-note">change a thing. see what happens.</p>
+        </article>
+
+        <article class="card game-night">
+          <div class="card-topline"><span class="card-index">05 / THE LONG GAME</span><span class="game-spark" aria-hidden="true">✦</span></div>
+          <div class="controller-art" aria-hidden="true">
+            <span class="controller-handle handle-left"></span><span class="controller-handle handle-right"></span>
+            <span class="dpad"><i></i><b></b></span><span class="stick stick-one"></span><span class="stick stick-two"></span>
+            <span class="button-cluster"><i></i><b></b><em></em><strong></strong></span>
+            <span class="controller-seam"></span>
+          </div>
+          <p class="game-kicker">someday, the fun part</p>
+          <h2>games just<br><em>work.</em></h2>
+          <p class="game-copy">Steam. Proton. Good drivers. A system that feels like ours.</p>
+          <div class="game-labels"><span>AMD</span><span>INTEL</span><span>NVIDIA</span></div>
+        </article>
+
+        <details class="card roadmap" id="learning-hub">
+          <summary class="roadmap-summary">
+            <span class="card-topline">
+              <span class="card-index">06 / THE SOMEDAY PLAN</span>
+              <span class="roadmap-cue"><span class="roadmap-note">tiny steps count</span><span class="roadmap-arrow" aria-hidden="true">↗</span></span>
             </span>
-            <span class="layers-note">open the learning hub</span>
+            <h2>from "what's a kernel?"<br>to myre.</h2>
+            <ol class="steps">
+              <li><span class="step-number">01</span><span class="step-title">make it boot</span><span class="step-detail">a tiny hello-world</span></li>
+              <li><span class="step-number">02</span><span class="step-title">learn the guts</span><span class="step-detail">memory, input, files</span></li>
+              <li><span class="step-number">03</span><span class="step-title">make it ours</span><span class="step-detail">build, break, repeat</span></li>
+              <li><span class="step-number">04</span><span class="step-title">play together</span><span class="step-detail">test games, share notes</span></li>
+            </ol>
+            <p class="roadmap-footer">we'll get there when we get there.</p>
           </summary>
 
           <section class="learning-panel" aria-labelledby="learning-panel-title">
             <div class="learning-intro">
-              <h3 id="learning-panel-title">learn it, try it, make a thing.</h3>
-              <p>First we'll learn how computers work. Then we'll test small ideas and build something of our own.</p>
+              <h3 id="learning-panel-title">learn first. test things. make things.</h3>
+              <p>We'll start by understanding how computers work, then try small experiments and build something together.</p>
+              <p class="learning-scroll-note">The team board is at the bottom of this card.</p>
             </div>
 
             <div class="learning-columns">
@@ -114,35 +144,55 @@
               </section>
             </div>
 
-            <p class="learning-status" id="learning-status" role="status" aria-live="polite">When available, progress saves in this browser only. It won't sync between devices yet.</p>
+            <section class="kanban" aria-labelledby="kanban-heading">
+              <div class="kanban-heading">
+                <div>
+                  <h3 id="kanban-heading">the little team board</h3>
+                  <p>Small tasks, moved along as we learn.</p>
+                </div>
+                <ul class="assignee-key" aria-label="Assignee colors">
+                  <li><span class="assignee-dot assignee-rajin" aria-hidden="true"></span>rajin</li>
+                  <li><span class="assignee-dot assignee-samiyeel" aria-hidden="true"></span>samiyeel</li>
+                  <li><span class="assignee-dot assignee-saumik" aria-hidden="true"></span>saumik</li>
+                </ul>
+              </div>
+
+              <form class="task-form" id="task-form">
+                <div class="field-group task-title-field">
+                  <label for="task-title">a small task</label>
+                  <input id="task-title" name="task-title" type="text" maxlength="120" autocomplete="off" placeholder="What should we try?" required>
+                </div>
+                <div class="field-group task-assignee-field">
+                  <label for="task-assignee">who's on it?</label>
+                  <select id="task-assignee" name="task-assignee" required>
+                    <option value="" selected disabled>choose a person</option>
+                    <option value="rajin">rajin</option>
+                    <option value="samiyeel">samiyeel</option>
+                    <option value="saumik">saumik</option>
+                  </select>
+                </div>
+                <button class="pin-button task-add-button" type="submit">add task</button>
+              </form>
+
+              <div class="kanban-columns">
+                <section class="kanban-column" aria-labelledby="column-todo-title">
+                  <h4 id="column-todo-title">up next <span class="task-count" id="count-todo">0</span></h4>
+                  <div class="kanban-task-list" id="kanban-todo" data-kanban-column="todo"></div>
+                </section>
+                <section class="kanban-column" aria-labelledby="column-doing-title">
+                  <h4 id="column-doing-title">in progress <span class="task-count" id="count-doing">0</span></h4>
+                  <div class="kanban-task-list" id="kanban-doing" data-kanban-column="doing"></div>
+                </section>
+                <section class="kanban-column" aria-labelledby="column-done-title">
+                  <h4 id="column-done-title">done for now <span class="task-count" id="count-done">0</span></h4>
+                  <div class="kanban-task-list" id="kanban-done" data-kanban-column="done"></div>
+                </section>
+              </div>
+            </section>
+
+            <p class="learning-status" id="learning-status" role="status" aria-live="polite">Videos, checklists, and tasks save in this browser only. They won't sync between devices yet.</p>
           </section>
         </details>
-
-        <article class="card game-night">
-          <div class="card-topline"><span class="card-index">05 / THE LONG GAME</span><span class="game-spark" aria-hidden="true">✦</span></div>
-          <div class="controller-art" aria-hidden="true">
-            <span class="controller-handle handle-left"></span><span class="controller-handle handle-right"></span>
-            <span class="dpad"><i></i><b></b></span><span class="stick stick-one"></span><span class="stick stick-two"></span>
-            <span class="button-cluster"><i></i><b></b><em></em><strong></strong></span>
-            <span class="controller-seam"></span>
-          </div>
-          <p class="game-kicker">someday, the fun part</p>
-          <h2>games just<br><em>work.</em></h2>
-          <p class="game-copy">Steam. Proton. Good drivers. A system that feels like ours.</p>
-          <div class="game-labels"><span>AMD</span><span>INTEL</span><span>NVIDIA</span></div>
-        </article>
-
-        <article class="card roadmap" id="roadmap">
-          <div class="card-topline"><span class="card-index">06 / THE SOMEDAY PLAN</span><span class="roadmap-note">tiny steps count ↗</span></div>
-          <h2>from "what's a kernel?"<br>to myre.</h2>
-          <ol class="steps">
-            <li><span class="step-number">01</span><span class="step-title">make it boot</span><span class="step-detail">a tiny hello-world</span></li>
-            <li><span class="step-number">02</span><span class="step-title">learn the guts</span><span class="step-detail">memory, input, files</span></li>
-            <li><span class="step-number">03</span><span class="step-title">make it ours</span><span class="step-detail">build, break, repeat</span></li>
-            <li><span class="step-number">04</span><span class="step-title">play together</span><span class="step-detail">test games, share notes</span></li>
-          </ol>
-          <p class="roadmap-footer">we'll get there when we get there.</p>
-        </article>
 
         <article class="card sticky-note">
           <span class="card-index">A NOTE TO FUTURE US</span>

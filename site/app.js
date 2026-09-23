@@ -50,6 +50,11 @@ const LESSON_FOLDERS = [
 ];
 
 const STORAGE_KEY = "myre-learning-v1";
+const TASK_COLUMNS = [
+  { id: "todo", name: "up next" },
+  { id: "doing", name: "in progress" },
+  { id: "done", name: "done for now" },
+];
 const videoForm = document.querySelector("#video-form");
 const videoUrlInput = document.querySelector("#video-url");
 const videoTitleInput = document.querySelector("#video-title");
@@ -57,6 +62,11 @@ const videoUrlError = document.querySelector("#video-url-error");
 const videoList = document.querySelector("#video-list");
 const lessonFolders = document.querySelector("#lesson-folders");
 const learningStatus = document.querySelector("#learning-status");
+const learningHub = document.querySelector("#learning-hub");
+const taskForm = document.querySelector("#task-form");
+const taskTitleInput = document.querySelector("#task-title");
+const taskAssigneeInput = document.querySelector("#task-assignee");
+const kanbanColumns = document.querySelector(".kanban-columns");
 
 function getYouTubeVideo(urlText) {
   try {
@@ -98,14 +108,29 @@ function loadState() {
           }];
         })
       : [];
+    const knownPeople = new Set(PEOPLE.map((person) => person.id));
+    const knownColumns = new Set(TASK_COLUMNS.map((column) => column.id));
+    const taskIds = new Set();
+    const tasks = Array.isArray(saved.tasks)
+      ? saved.tasks.flatMap((task) => {
+          if (!task || typeof task !== "object") return [];
+          const id = typeof task.id === "string" ? task.id : "";
+          const title = typeof task.title === "string" ? task.title.trim().slice(0, 120) : "";
+          if (!/^[a-z0-9-]{1,100}$/.test(id) || taskIds.has(id) || !title
+            || !knownPeople.has(task.assignee) || !knownColumns.has(task.status)) return [];
+          taskIds.add(id);
+          return [{ id, title, assignee: task.assignee, status: task.status }];
+        })
+      : [];
     return {
       videos,
+      tasks,
       checks: saved.checks && typeof saved.checks === "object" && !Array.isArray(saved.checks)
         ? saved.checks
         : {},
     };
   } catch {
-    return { videos: [], checks: {} };
+    return { videos: [], checks: {}, tasks: [] };
   }
 }
 
@@ -214,6 +239,64 @@ function renderLessons() {
   }
 }
 
+function renderKanban() {
+  for (const column of TASK_COLUMNS) {
+    const list = kanbanColumns.querySelector(`[data-kanban-column="${column.id}"]`);
+    const tasks = state.tasks.filter((task) => task.status === column.id);
+    document.querySelector(`#count-${column.id}`).textContent = String(tasks.length);
+    list.replaceChildren();
+
+    if (!tasks.length) {
+      list.append(element("p", "empty-column", "nothing here yet."));
+      continue;
+    }
+
+    for (const task of tasks) {
+      const card = element("article", `kanban-task assignee-${task.assignee}`);
+      card.dataset.assignee = task.assignee;
+      card.append(element("p", "kanban-task-title", task.title));
+
+      const controls = element("div", "kanban-task-controls");
+      const assigneeLabel = element("label", "visually-hidden", `Assignee for ${task.title}`);
+      const assigneeSelect = document.createElement("select");
+      assigneeSelect.id = `task-assignee-${task.id}`;
+      assigneeSelect.className = "task-control task-assignee";
+      assigneeSelect.dataset.taskAssignee = task.id;
+      assigneeSelect.setAttribute("aria-label", `Assignee for ${task.title}`);
+      assigneeSelect.dataset.assignee = task.assignee;
+      for (const person of PEOPLE) {
+        const option = element("option", "", person.name);
+        option.value = person.id;
+        option.selected = person.id === task.assignee;
+        assigneeSelect.append(option);
+      }
+      assigneeLabel.htmlFor = assigneeSelect.id;
+
+      const statusLabel = element("label", "visually-hidden", `Status for ${task.title}`);
+      const statusSelect = document.createElement("select");
+      statusSelect.id = `task-status-${task.id}`;
+      statusSelect.className = "task-control task-status";
+      statusSelect.dataset.taskStatus = task.id;
+      statusSelect.setAttribute("aria-label", `Move ${task.title} to a column`);
+      for (const status of TASK_COLUMNS) {
+        const option = element("option", "", status.name);
+        option.value = status.id;
+        option.selected = status.id === task.status;
+        statusSelect.append(option);
+      }
+      statusLabel.htmlFor = statusSelect.id;
+
+      const removeButton = element("button", "task-remove", "remove");
+      removeButton.type = "button";
+      removeButton.dataset.removeTask = task.id;
+      removeButton.setAttribute("aria-label", `Remove task: ${task.title}`);
+      controls.append(assigneeLabel, assigneeSelect, statusLabel, statusSelect, removeButton);
+      card.append(controls);
+      list.append(card);
+    }
+  }
+}
+
 function announce(message) {
   learningStatus.textContent = message;
 }
@@ -274,8 +357,28 @@ videoList.addEventListener("click", (event) => {
     : `Removed ${video?.title || "the video"}, but this browser couldn't save the change.`);
 });
 
-document.querySelector("#learning-hub").addEventListener("change", (event) => {
+learningHub.addEventListener("change", (event) => {
   const input = event.target;
+  if (input.matches("select[data-task-assignee], select[data-task-status]")) {
+    const isAssignee = input.matches("[data-task-assignee]");
+    const taskId = isAssignee ? input.dataset.taskAssignee : input.dataset.taskStatus;
+    const task = state.tasks.find((saved) => saved.id === taskId);
+    if (!task) return;
+
+    if (isAssignee) {
+      task.assignee = input.value;
+    } else {
+      task.status = input.value;
+    }
+    const focusId = isAssignee ? `task-assignee-${taskId}` : `task-status-${taskId}`;
+    renderKanban();
+    document.getElementById(focusId)?.focus();
+    announce(saveState()
+      ? `Updated ${task.title} on this browser.`
+      : `Updated ${task.title}, but this browser couldn't save the change.`);
+    return;
+  }
+
   if (!input.matches("input[data-progress-key]")) return;
 
   const { progressKey, personId } = input.dataset;
@@ -286,5 +389,41 @@ document.querySelector("#learning-hub").addEventListener("change", (event) => {
     : `Changed ${personId}'s check, but this browser couldn't save it.`);
 });
 
+taskTitleInput.addEventListener("input", () => taskTitleInput.setCustomValidity(""));
+
+taskForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const title = taskTitleInput.value.trim().slice(0, 120);
+  if (!title) {
+    taskTitleInput.setCustomValidity("Add a short task name first.");
+    taskTitleInput.reportValidity();
+    return;
+  }
+
+  const taskId = globalThis.crypto?.randomUUID?.()
+    || `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  state.tasks.unshift({ id: taskId, title, assignee: taskAssigneeInput.value, status: "todo" });
+  renderKanban();
+  taskForm.reset();
+  announce(saveState()
+    ? `Added ${title}. The task board is saved in this browser.`
+    : `Added ${title}, but this browser couldn't save the task.`);
+  taskTitleInput.focus();
+});
+
+kanbanColumns.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-remove-task]");
+  if (!button) return;
+
+  const task = state.tasks.find((saved) => saved.id === button.dataset.removeTask);
+  state.tasks = state.tasks.filter((saved) => saved.id !== button.dataset.removeTask);
+  renderKanban();
+  announce(saveState()
+    ? `Removed ${task?.title || "the task"} from the board.`
+    : `Removed ${task?.title || "the task"}, but this browser couldn't save the change.`);
+  taskTitleInput.focus();
+});
+
 renderVideos();
 renderLessons();
+renderKanban();
