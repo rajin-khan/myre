@@ -14,6 +14,7 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 - `site/learning/` contains the Markdown notes shown in the hub, grouped by what we're learning, testing, and making.
 - `site/banner.html` and `site/banner.css` make the screenshot-ready banner.
 - `site/banner.png` is the supplied banner artwork.
+- `site/favicon.svg` is the four-square icon used by the site pages.
 - `site/styles.css` styles the vision board and the responsive learning page.
 
 As new cards get their own material, keep the board quick to scan and link each card to a page for the full details.
