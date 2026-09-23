@@ -13,6 +13,7 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 - `site/app.js` saves those shared items in Supabase. `site/config.js` holds the public project URL and publishable key. Never put a secret or service-role key in browser code.
 - `site/learning/` contains the starter Markdown lessons, grouped by what we're learning, testing, and making.
 - `supabase/schema.sql` creates the studies tables and access rules in a new Supabase project.
+- `supabase/heartbeat.sql` starts a daily database-side write, including before Vercel deployment.
 - `site/api/heartbeat.js` and `site/vercel.json` schedule a private daily database write after deployment.
 - `site/banner.html` and `site/banner.css` make the screenshot-ready banner.
 - `site/banner.png` is the screenshot of the HTML banner.
@@ -29,12 +30,12 @@ Sign-in uses Supabase's default magic-link email. Its built-in email sender only
 
 For Vercel, choose `site` as the Root Directory and the static/Other framework option. Once it is deployed, set Supabase Authentication → URL Configuration to the production site URL and allow the exact `https://your-site.example/learning.html` redirect. Test the email link on that deployed site. A local `file://` copy cannot complete the email redirect.
 
-The daily heartbeat is configured for 08:00 UTC in `site/vercel.json`. It only runs from a production Vercel deployment. Set these *server-side* Vercel environment variables before deploying:
+The database-side heartbeat in `supabase/heartbeat.sql` runs daily at 08:00 UTC, even before deployment. The separate external heartbeat in `site/vercel.json` also runs at 08:00 UTC, but only from a production Vercel deployment. For the external heartbeat, set these *server-side* Vercel environment variables before deploying:
 
 - `CRON_SECRET`: a random secret of at least 16 characters. Vercel sends it to the scheduled endpoint as a bearer token.
 - `SUPABASE_SERVICE_ROLE_KEY`: the project's service-role key from Supabase. Keep it only in Vercel's encrypted environment settings; never add it to `site/config.js`, Git, or a public page.
 
-After deployment, check Vercel Cron Jobs and logs, then confirm the `last_ping_at` value in the private `myre_heartbeat` row changes. A daily write is an attempt to keep the free project active, **not a guarantee** against Supabase inactivity pausing.
+After deployment, check Vercel Cron Jobs and logs, then confirm the `last_ping_at` value in the private `myre_heartbeat` row changes. Supabase Cron's history shows whether the internal job ran. The internal write may not count as user activity, and even an external daily request is **not a guarantee** against Supabase inactivity pausing.
 
 The old browser-only `myre-learning-v1` data remains in that browser's local storage; this version does not delete or silently import it.
 
