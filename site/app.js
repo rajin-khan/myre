@@ -62,7 +62,7 @@ const videoUrlError = document.querySelector("#video-url-error");
 const videoList = document.querySelector("#video-list");
 const lessonFolders = document.querySelector("#lesson-folders");
 const learningStatus = document.querySelector("#learning-status");
-const learningHub = document.querySelector("#learning-hub");
+const learningHub = document.querySelector("#learning-content");
 const taskForm = document.querySelector("#task-form");
 const taskTitleInput = document.querySelector("#task-title");
 const taskAssigneeInput = document.querySelector("#task-assignee");
@@ -201,7 +201,7 @@ function renderVideos() {
     thumbnailLink.append(image);
 
     const heading = element("div", "video-item-heading");
-    heading.append(element("h4", "", video.title));
+    heading.append(element("h3", "", video.title));
     const removeButton = element("button", "video-remove", "remove");
     removeButton.type = "button";
     removeButton.dataset.removeVideo = video.id;
@@ -219,12 +219,12 @@ function renderLessons() {
   for (const folder of LESSON_FOLDERS) {
     const section = element("section", "lesson-folder");
     const heading = element("div", "lesson-folder-heading");
-    heading.append(element("h4", "", folder.name), element("code", "", folder.path));
+    heading.append(element("h3", "", folder.name), element("code", "", folder.path));
 
     const list = element("div", "lesson-list");
     for (const lesson of folder.lessons) {
       const card = element("article", "lesson-item");
-      card.append(element("h5", "", lesson.title), element("p", "", lesson.summary));
+      card.append(element("h4", "", lesson.title), element("p", "", lesson.summary));
       const link = element("a", "lesson-link", "open markdown ↗");
       link.href = lesson.file;
       link.target = "_blank";

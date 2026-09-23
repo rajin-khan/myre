@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3efe4">
+    <meta name="description" content="The myre crew's shared place for learning, experiments, notes, and small tasks.">
+    <title>learn together · myre</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="learning-page">
+    <a class="skip-link" href="#main">skip to learning page</a>
+    <header class="learning-page-header">
+      <div class="page-shell learning-topbar">
+        <a class="brand" href="index.html#top" aria-label="myre home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span>myre</span>
+        </a>
+        <a class="back-link" href="index.html#roadmap-card"><span aria-hidden="true">←</span> back to the board</a>
+      </div>
+    </header>
+
+    <main class="page-shell learning-main" id="main">
+      <section class="learning-hero" aria-labelledby="learning-title">
+        <div class="learning-hero-topline">
+          <span>06 / THE LEARNING ROOM</span>
+          <span>groceryboix · myre</span>
+        </div>
+        <h1 id="learning-title" tabindex="-1">learn how it works.<br><em>then make a thing.</em></h1>
+        <p>We'll start with the basics, try small ideas, and keep notes as we build.</p>
+        <nav class="learning-page-nav" aria-label="On this page">
+          <a href="#video-heading">videos <span aria-hidden="true">↘</span></a>
+          <a href="#lessons-heading">lessons <span aria-hidden="true">↘</span></a>
+          <a href="#kanban-heading">team board <span aria-hidden="true">↘</span></a>
+        </nav>
+      </section>
+
+      <div class="learning-content" id="learning-content">
+        <div class="learning-columns">
+          <section class="learning-section" aria-labelledby="video-heading">
+            <h2 id="video-heading">YouTube pile</h2>
+            <p class="learning-section-note">Drop in a YouTube link. We'll keep its thumbnail here.</p>
+            <form class="video-form" id="video-form" novalidate>
+              <div class="video-fields">
+                <div class="field-group">
+                  <label for="video-url">YouTube link</label>
+                  <input id="video-url" name="youtube-url" type="url" inputmode="url" autocomplete="url" placeholder="https://youtu.be/..." aria-describedby="video-url-hint video-url-error" required>
+                  <small id="video-url-hint">Paste a YouTube video link.</small>
+                  <small class="field-error" id="video-url-error" hidden>That link doesn't look like a YouTube video. Try a youtube.com or youtu.be link.</small>
+                </div>
+                <div class="field-group">
+                  <label for="video-title">Video name <span>(optional)</span></label>
+                  <input id="video-title" name="video-title" type="text" maxlength="100" autocomplete="off" placeholder="Give it a name">
+                </div>
+              </div>
+              <button class="pin-button" type="submit">pin video</button>
+            </form>
+            <div class="video-list" id="video-list"></div>
+          </section>
+
+          <section class="learning-section lessons-section" aria-labelledby="lessons-heading">
+            <h2 id="lessons-heading">folders &amp; lessons</h2>
+            <p class="learning-section-note">Short Markdown notes, grouped by what we're learning.</p>
+            <div class="lesson-folders" id="lesson-folders"></div>
+          </section>
+        </div>
+
+        <section class="kanban" aria-labelledby="kanban-heading">
+          <div class="kanban-heading">
+            <div>
+              <h2 id="kanban-heading">the little team board</h2>
+              <p>Give a small task a person, then move it along.</p>
+            </div>
+            <ul class="assignee-key" aria-label="Assignee colors">
+              <li><span class="assignee-dot assignee-rajin" aria-hidden="true"></span>rajin</li>
+              <li><span class="assignee-dot assignee-samiyeel" aria-hidden="true"></span>samiyeel</li>
+              <li><span class="assignee-dot assignee-saumik" aria-hidden="true"></span>saumik</li>
+            </ul>
+          </div>
+
+          <form class="task-form" id="task-form">
+            <div class="field-group task-title-field">
+              <label for="task-title">a small task</label>
+              <input id="task-title" name="task-title" type="text" maxlength="120" autocomplete="off" placeholder="What should we try?" required>
+            </div>
+            <div class="field-group task-assignee-field">
+              <label for="task-assignee">who's on it?</label>
+              <select id="task-assignee" name="task-assignee" required>
+                <option value="" selected disabled>choose a person</option>
+                <option value="rajin">rajin</option>
+                <option value="samiyeel">samiyeel</option>
+                <option value="saumik">saumik</option>
+              </select>
+            </div>
+            <button class="pin-button task-add-button" type="submit">add task</button>
+          </form>
+
+          <div class="kanban-columns">
+            <section class="kanban-column" aria-labelledby="column-todo-title">
+              <h3 id="column-todo-title">up next <span class="task-count" id="count-todo">0</span></h3>
+              <div class="kanban-task-list" id="kanban-todo" data-kanban-column="todo"></div>
+            </section>
+            <section class="kanban-column" aria-labelledby="column-doing-title">
+              <h3 id="column-doing-title">in progress <span class="task-count" id="count-doing">0</span></h3>
+              <div class="kanban-task-list" id="kanban-doing" data-kanban-column="doing"></div>
+            </section>
+            <section class="kanban-column" aria-labelledby="column-done-title">
+              <h3 id="column-done-title">done for now <span class="task-count" id="count-done">0</span></h3>
+              <div class="kanban-task-list" id="kanban-done" data-kanban-column="done"></div>
+            </section>
+          </div>
+        </section>
+
+        <p class="learning-status" id="learning-status" role="status" aria-live="polite">Progress stays in this browser for now. It doesn't sync between devices.</p>
+      </div>
+    </main>
+
+    <footer class="footer learning-page-footer page-shell">
+      <span>myre / build 000</span>
+      <span><a href="index.html#top">back to groceryboix <span class="footer-star" aria-hidden="true">✳</span></a></span>
+    </footer>
+    <script src="app.js" defer></script>
+  </body>
+</html>

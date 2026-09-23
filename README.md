@@ -8,12 +8,15 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 
 ## Site files
 
-- `site/index.html` is the project vision board.
-- `site/app.js` powers the learning hub. Pinned videos, checklists, and tasks are saved in the current browser only; they don't sync between people or devices.
+- `site/index.html` is the project vision board. Card 6 links to its own page instead of opening inside the grid.
+- `site/learning.html` is the learning page for pinned videos, lesson notes, checklists, and the team board.
+- `site/app.js` powers the learning page. Pinned videos, checklists, and tasks are saved in the current browser only; they don't sync between people or devices.
 - `site/learning/` contains the Markdown notes shown in the hub, grouped by what we're learning, testing, and making.
 - `site/banner.html` and `site/banner.css` make the screenshot-ready banner.
 - `site/banner.png` is the supplied banner artwork.
-- `site/styles.css` styles the vision board and its responsive learning hub.
+- `site/styles.css` styles the vision board and the responsive learning page.
+
+As new cards get their own material, keep the board quick to scan and link each card to a page for the full details.
 
 ## The people making it
 
