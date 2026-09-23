@@ -63,20 +63,60 @@
               <small>well, it printed something.</small>
             </div>
           </div>
-          <p class="card-caption">first goal: make the machine say hello.</p>
+          <p class="card-caption">first build: make the machine say hello.</p>
         </article>
 
-        <article class="card layers">
-          <div class="card-topline"><span class="card-index">04 / WHAT WE'LL LEARN</span><span class="layer-arrow" aria-hidden="true">↓</span></div>
-          <h2>one layer<br>at a time.</h2>
-          <div class="layer-stack" aria-label="Learning path from hardware to desktop">
-            <span class="layer layer-desktop">desktop <i>the part we see</i></span>
-            <span class="layer layer-shell">shell <i>where we ask</i></span>
-            <span class="layer layer-kernel">kernel <i>the core rules</i></span>
-            <span class="layer layer-hardware">hardware <i>the actual machine</i></span>
-          </div>
-          <p class="layers-note">change a thing. see what happens.</p>
-        </article>
+        <details class="card layers" id="learning-hub">
+          <summary class="layers-summary">
+            <span class="card-topline"><span class="card-index">04 / OUR FIRST GOAL</span><span class="layer-arrow" aria-hidden="true">↗</span></span>
+            <h2>learn first.<br>test &amp; make next.</h2>
+            <span class="layer-stack" aria-label="A computer has layers, from hardware up to the desktop">
+              <span class="layer layer-desktop">desktop <i>the part we see</i></span>
+              <span class="layer layer-shell">shell <i>where we ask</i></span>
+              <span class="layer layer-kernel">kernel <i>the core rules</i></span>
+              <span class="layer layer-hardware">hardware <i>the actual machine</i></span>
+            </span>
+            <span class="layers-note">open the learning hub</span>
+          </summary>
+
+          <section class="learning-panel" aria-labelledby="learning-panel-title">
+            <div class="learning-intro">
+              <h3 id="learning-panel-title">learn it, try it, make a thing.</h3>
+              <p>First we'll learn how computers work. Then we'll test small ideas and build something of our own.</p>
+            </div>
+
+            <div class="learning-columns">
+              <section class="learning-section" aria-labelledby="video-heading">
+                <h3 id="video-heading">YouTube pile</h3>
+                <p class="learning-section-note">Add a video link. Its thumbnail will show up here.</p>
+                <form class="video-form" id="video-form" novalidate>
+                  <div class="video-fields">
+                    <div class="field-group">
+                      <label for="video-url">YouTube link</label>
+                      <input id="video-url" name="youtube-url" type="url" inputmode="url" autocomplete="url" placeholder="https://youtu.be/..." aria-describedby="video-url-hint video-url-error" required>
+                      <small id="video-url-hint">Paste a YouTube video link.</small>
+                      <small class="field-error" id="video-url-error" hidden>That link doesn't look like a YouTube video. Try a youtube.com or youtu.be link.</small>
+                    </div>
+                    <div class="field-group">
+                      <label for="video-title">Video name <span>(optional)</span></label>
+                      <input id="video-title" name="video-title" type="text" maxlength="100" autocomplete="off" placeholder="Give it a name">
+                    </div>
+                  </div>
+                  <button class="pin-button" type="submit">pin video</button>
+                </form>
+                <div class="video-list" id="video-list" aria-live="polite"></div>
+              </section>
+
+              <section class="learning-section lessons-section" aria-labelledby="lessons-heading">
+                <h3 id="lessons-heading">folders &amp; lessons</h3>
+                <p class="learning-section-note">Markdown notes, grouped in the order we're learning.</p>
+                <div class="lesson-folders" id="lesson-folders"></div>
+              </section>
+            </div>
+
+            <p class="learning-status" id="learning-status" role="status" aria-live="polite">When available, progress saves in this browser only. It won't sync between devices yet.</p>
+          </section>
+        </details>
 
         <article class="card game-night">
           <div class="card-topline"><span class="card-index">05 / THE LONG GAME</span><span class="game-spark" aria-hidden="true">✦</span></div>
@@ -117,5 +157,6 @@
         <span>groceryboix <span class="footer-star">✳</span></span>
       </footer>
     </main>
+    <script src="app.js" defer></script>
   </body>
 </html>

@@ -9,6 +9,8 @@ The long-term idea is an Arch-based Linux system with strong gaming support. We'
 ## Site files
 
 - `index.html` is the project vision board.
+- `app.js` powers the expandable learning hub. Video links and checkmarks are saved in the current browser only.
+- `learning/` contains the Markdown notes shown in the hub, grouped by what we're learning, testing, and making.
 - `banner.html` and `banner.css` make the screenshot-ready banner.
 - `banner.png` is the supplied 2644 × 1692 banner artwork.
 - `styles.css` styles the vision board.
