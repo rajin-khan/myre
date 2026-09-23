@@ -63,6 +63,12 @@
       </section>
 
       <div class="learning-content" id="learning-content" hidden>
+        <section class="learning-section crew-library" aria-labelledby="crew-library-heading">
+          <h2 id="crew-library-heading" tabindex="-1">crew notebooks</h2>
+          <p class="learning-section-note">Notes pushed from our Git branches. Open one to read it.</p>
+          <div class="crew-notebooks" id="crew-notebooks"></div>
+        </section>
+
         <div class="learning-columns">
           <section class="learning-section" aria-labelledby="video-heading">
             <h2 id="video-heading">YouTube pile</h2>
@@ -86,8 +92,8 @@
           </section>
 
           <section class="learning-section lessons-section" aria-labelledby="lessons-heading">
-            <h2 id="lessons-heading">notes &amp; lessons</h2>
-            <p class="learning-section-note">Keep notes here. The starter lessons live in the repo as Markdown files.</p>
+            <h2 id="lessons-heading">notes</h2>
+            <p class="learning-section-note">Write here, then open a note to read it with formatting.</p>
             <form class="note-form" id="note-form" data-editor-only hidden>
               <div class="note-fields">
                 <div class="field-group">
@@ -115,22 +121,6 @@
             <div class="lesson-folders" id="lesson-folders"></div>
           </section>
         </div>
-
-        <section class="learning-section crew-library" aria-labelledby="crew-library-heading">
-          <h2 id="crew-library-heading" tabindex="-1">crew notebooks</h2>
-          <p class="learning-section-note">Markdown notes from our Git branches. Pick one to read it here.</p>
-          <div class="crew-notebooks" id="crew-notebooks"></div>
-          <section class="markdown-viewer" id="markdown-viewer" aria-labelledby="markdown-viewer-title" hidden>
-            <header class="markdown-viewer-header">
-              <div>
-                <p class="markdown-viewer-kicker" id="markdown-viewer-source"></p>
-                <h3 id="markdown-viewer-title" tabindex="-1"></h3>
-              </div>
-              <button class="plain-button" id="markdown-close-button" type="button">close note</button>
-            </header>
-            <article class="markdown-body" id="markdown-body"></article>
-          </section>
-        </section>
 
         <section class="kanban" aria-labelledby="kanban-heading">
           <div class="kanban-heading">

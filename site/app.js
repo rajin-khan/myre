@@ -5,31 +5,9 @@ const COLUMNS = [
   { id: "done", name: "done for now" },
 ];
 const FOLDERS = [
-  {
-    id: "learn",
-    name: "learn first",
-    path: "learning/01-learn",
-    lessons: [
-      { id: "what-is-an-os", title: "what is an operating system?", file: "learning/01-learn/what-is-an-operating-system.md", summary: "A first look at the jobs an operating system does." },
-      { id: "how-a-computer-starts", title: "how does a computer start?", file: "learning/01-learn/how-a-computer-starts.md", summary: "Follow the hand-off from power button to desktop." },
-    ],
-  },
-  {
-    id: "test",
-    name: "test small ideas",
-    path: "learning/02-test",
-    lessons: [
-      { id: "first-safe-experiment", title: "our first safe experiment", file: "learning/02-test/first-safe-experiment.md", summary: "Change one thing, keep notes, and find out what happened." },
-    ],
-  },
-  {
-    id: "make",
-    name: "make something",
-    path: "learning/03-make",
-    lessons: [
-      { id: "first-small-build", title: "pick a tiny thing to build", file: "learning/03-make/first-small-build.md", summary: "Turn something we learned into a small working project." },
-    ],
-  },
+  { id: "learn", name: "learn first" },
+  { id: "test", name: "test small ideas" },
+  { id: "make", name: "make something" },
 ];
 
 const state = { videos: [], notes: [], tasks: [], checks: [], files: [] };
@@ -59,14 +37,9 @@ const signedInName = document.querySelector("#signed-in-name");
 const accessCopy = document.querySelector("#access-copy");
 const status = document.querySelector("#learning-status");
 const notebooks = document.querySelector("#crew-notebooks");
-const markdownViewer = document.querySelector("#markdown-viewer");
-const markdownBody = document.querySelector("#markdown-body");
-const markdownTitle = document.querySelector("#markdown-viewer-title");
-const markdownSource = document.querySelector("#markdown-viewer-source");
 
 let canEdit = false;
 let editingNoteId = null;
-let selectedFile = null;
 
 function announce(message) {
   status.textContent = message;
@@ -171,13 +144,17 @@ function renderLessons() {
   for (const folder of FOLDERS) {
     const section = node("section", "lesson-folder");
     const heading = node("div", "lesson-folder-heading");
-    heading.append(node("h3", "", folder.name), node("code", "", folder.path));
+    heading.append(node("h3", "", folder.name));
     const list = node("div", "lesson-list");
-
-    for (const note of state.notes.filter((item) => item.folder === folder.id)) {
-      const details = node("details", "lesson-item note-item");
-      details.append(node("summary", "note-summary", note.title));
-      details.append(node("pre", "note-body", note.body));
+    const notes = state.notes.filter((item) => item.folder === folder.id);
+    if (!notes.length) list.append(node("p", "crew-notebook-empty", "No notes here yet."));
+    for (const note of notes) {
+      const card = node("article", "lesson-item note-item");
+      card.append(node("h4", "", note.title));
+      const link = node("a", "lesson-link", "read note ↗");
+      link.href = `note.html?id=${encodeURIComponent(note.id)}`;
+      link.setAttribute("aria-label", `Read ${note.title}`);
+      card.append(link);
       if (canEdit) {
         const actions = node("div", "note-item-actions");
         const edit = node("button", "plain-button", "edit");
@@ -189,21 +166,9 @@ function renderLessons() {
         remove.dataset.removeNote = note.id;
         remove.setAttribute("aria-label", `Remove ${note.title}`);
         actions.append(edit, remove);
-        details.append(actions);
+        card.append(actions);
       }
-      details.append(progressChecks(`note-${note.id}`, "read by"));
-      list.append(details);
-    }
-
-    for (const lesson of folder.lessons) {
-      const card = node("article", "lesson-item");
-      card.append(node("h4", "", lesson.title), node("p", "", lesson.summary));
-      const link = node("a", "lesson-link", "open markdown ↗");
-      link.href = lesson.file;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.setAttribute("aria-label", `Open the Markdown lesson: ${lesson.title}`);
-      card.append(link, progressChecks(`lesson-${lesson.id}`, "read by"));
+      card.append(progressChecks(`note-${note.id}`, "read by"));
       list.append(card);
     }
     section.append(heading, list);
@@ -268,73 +233,13 @@ function renderNotebooks() {
     const files = state.files.filter((file) => file.author === person);
     if (!files.length) list.append(node("p", "crew-notebook-empty", "No notes pushed yet."));
     for (const file of files) {
-      const button = node("button", "crew-note");
-      button.type = "button";
-      button.dataset.fileBranch = file.branch;
-      button.dataset.filePath = file.path;
-      if (selectedFile?.branch === file.branch && selectedFile?.path === file.path) {
-        button.setAttribute("aria-current", "true");
-      }
-      button.append(node("span", "", file.title), node("small", "", `${file.branch} · ${file.path.split("/").slice(2).join("/")}`));
-      list.append(button);
+      const link = node("a", "crew-note");
+      link.href = `note.html?branch=${encodeURIComponent(file.branch)}&path=${encodeURIComponent(file.path)}`;
+      link.append(node("span", "", file.title), node("small", "", `${file.branch} · ${file.path.split("/").slice(2).join("/")}`));
+      list.append(link);
     }
     section.append(list);
     notebooks.append(section);
-  }
-  if (selectedFile && !state.files.some((file) => file.branch === selectedFile.branch && file.path === selectedFile.path)) {
-    closeMarkdown();
-  }
-}
-
-function closeMarkdown() {
-  selectedFile = null;
-  markdownViewer.hidden = true;
-  markdownBody.replaceChildren();
-  notebooks.querySelectorAll('[aria-current="true"]').forEach((button) => button.removeAttribute("aria-current"));
-}
-
-async function openMarkdown(file) {
-  selectedFile = { branch: file.branch, path: file.path };
-  renderNotebooks();
-  markdownViewer.hidden = false;
-  markdownTitle.textContent = file.title;
-  markdownSource.textContent = `${file.author} / ${file.branch} / ${file.path}`;
-  markdownBody.textContent = "Opening note…";
-  markdownViewer.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-  markdownTitle.focus({ preventScroll: true });
-  try {
-    const [{ marked }, { default: DOMPurify }] = await Promise.all([
-      import("https://cdn.jsdelivr.net/npm/marked@18.0.7/lib/marked.esm.js"),
-      import("https://cdn.jsdelivr.net/npm/dompurify@3.4.15/dist/purify.es.mjs"),
-    ]);
-    if (selectedFile?.branch !== file.branch || selectedFile?.path !== file.path) return;
-    marked.setOptions({ gfm: true, breaks: false });
-    markdownBody.innerHTML = DOMPurify.sanitize(marked.parse(file.body), { USE_PROFILES: { html: true } });
-    for (const anchor of markdownBody.querySelectorAll("a[href]")) {
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-    }
-    for (const table of markdownBody.querySelectorAll("table")) {
-      const wrapper = node("div", "table-wrap");
-      table.replaceWith(wrapper);
-      wrapper.append(table);
-    }
-    const diagrams = [];
-    for (const code of markdownBody.querySelectorAll("pre > code.language-mermaid")) {
-      const diagram = node("div", "mermaid", code.textContent);
-      code.parentElement.replaceWith(diagram);
-      diagrams.push(diagram);
-    }
-    if (diagrams.length) {
-      const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs");
-      if (selectedFile?.branch !== file.branch || selectedFile?.path !== file.path) return;
-      mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
-      await mermaid.run({ nodes: diagrams, suppressErrors: true });
-    }
-  } catch (error) {
-    console.error("Markdown reader failed:", error);
-    markdownBody.textContent = file.body;
-    announce("The formatted reader could not load. Showing the Markdown text instead.");
   }
 }
 
@@ -404,18 +309,6 @@ function setAccess(name) {
     : "Choose your name and enter your password.";
   showEditorControls();
 }
-
-notebooks.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-file-path]");
-  if (!button) return;
-  const file = state.files.find((item) => item.branch === button.dataset.fileBranch && item.path === button.dataset.filePath);
-  if (file) openMarkdown(file);
-});
-
-document.querySelector("#markdown-close-button").addEventListener("click", () => {
-  closeMarkdown();
-  document.querySelector("#crew-library-heading").focus();
-});
 
 signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();
