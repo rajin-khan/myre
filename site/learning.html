@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="learning-page">
-    <a class="skip-link" href="#main">skip to learning page</a>
+    <a class="skip-link" href="#main">skip to studies</a>
     <header class="learning-page-header">
       <div class="page-shell learning-topbar">
         <a class="brand" href="index.html#top" aria-label="myre home">
@@ -22,26 +22,32 @@
     </header>
 
     <main class="page-shell learning-main" id="main">
-      <section class="learning-hero" aria-labelledby="learning-title">
-        <div class="learning-hero-topline">
-          <span>06 / THE LEARNING ROOM</span>
-          <span>groceryboix · myre</span>
+      <header class="studies-heading">
+        <span class="card-index">06 / STUDIES</span>
+        <h1 id="learning-title">studies</h1>
+        <p>Videos, notes, and small jobs for the three of us.</p>
+      </header>
+
+      <section class="study-access" aria-label="Shared editing">
+        <p id="access-copy">Loading the shared board...</p>
+        <form id="sign-in-form" hidden>
+          <label for="editor-email">Crew email</label>
+          <input id="editor-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
+          <button class="pin-button" type="submit">send sign-in link</button>
+        </form>
+        <div class="signed-in" id="signed-in" hidden>
+          <span id="signed-in-email"></span>
+          <button type="button" id="sign-out-button">sign out</button>
         </div>
-        <h1 id="learning-title" tabindex="-1">learn how it works.<br><em>then make a thing.</em></h1>
-        <p>We'll start with the basics, try small ideas, and keep notes as we build.</p>
-        <nav class="learning-page-nav" aria-label="On this page">
-          <a href="#video-heading">videos <span aria-hidden="true">↘</span></a>
-          <a href="#lessons-heading">lessons <span aria-hidden="true">↘</span></a>
-          <a href="#kanban-heading">team board <span aria-hidden="true">↘</span></a>
-        </nav>
+        <button class="plain-button" id="refresh-button" type="button" disabled>refresh</button>
       </section>
 
       <div class="learning-content" id="learning-content">
         <div class="learning-columns">
           <section class="learning-section" aria-labelledby="video-heading">
             <h2 id="video-heading">YouTube pile</h2>
-            <p class="learning-section-note">Drop in a YouTube link. We'll keep its thumbnail here.</p>
-            <form class="video-form" id="video-form" novalidate>
+            <p class="learning-section-note">Pin a link, then mark who watched it.</p>
+            <form class="video-form" id="video-form" data-editor-only hidden novalidate>
               <div class="video-fields">
                 <div class="field-group">
                   <label for="video-url">YouTube link</label>
@@ -60,8 +66,32 @@
           </section>
 
           <section class="learning-section lessons-section" aria-labelledby="lessons-heading">
-            <h2 id="lessons-heading">folders &amp; lessons</h2>
-            <p class="learning-section-note">Short Markdown notes, grouped by what we're learning.</p>
+            <h2 id="lessons-heading">notes &amp; lessons</h2>
+            <p class="learning-section-note">Keep notes here. The starter lessons live in the repo as Markdown files.</p>
+            <form class="note-form" id="note-form" data-editor-only hidden>
+              <div class="note-fields">
+                <div class="field-group">
+                  <label for="note-title">Note title</label>
+                  <input id="note-title" name="note-title" type="text" maxlength="120" autocomplete="off" placeholder="What did we find out?" required>
+                </div>
+                <div class="field-group">
+                  <label for="note-folder">Folder</label>
+                  <select id="note-folder" name="note-folder">
+                    <option value="learn">learn first</option>
+                    <option value="test">test small ideas</option>
+                    <option value="make">make something</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-group">
+                <label for="note-body">Note <span>(Markdown is fine)</span></label>
+                <textarea id="note-body" name="note-body" rows="6" maxlength="20000" placeholder="Write what happened, what worked, and what to try next." required></textarea>
+              </div>
+              <div class="note-actions">
+                <button class="pin-button" id="note-save-button" type="submit">save note</button>
+                <button class="plain-button" id="note-cancel-button" type="button" hidden>cancel edit</button>
+              </div>
+            </form>
             <div class="lesson-folders" id="lesson-folders"></div>
           </section>
         </div>
@@ -79,7 +109,7 @@
             </ul>
           </div>
 
-          <form class="task-form" id="task-form">
+          <form class="task-form" id="task-form" data-editor-only hidden>
             <div class="field-group task-title-field">
               <label for="task-title">a small task</label>
               <input id="task-title" name="task-title" type="text" maxlength="120" autocomplete="off" placeholder="What should we try?" required>
@@ -112,7 +142,7 @@
           </div>
         </section>
 
-        <p class="learning-status" id="learning-status" role="status" aria-live="polite">Progress stays in this browser for now. It doesn't sync between devices.</p>
+        <p class="learning-status" id="learning-status" role="status" aria-live="polite"></p>
       </div>
     </main>
 
@@ -120,6 +150,8 @@
       <span>myre / build 000</span>
       <span><a href="index.html#top">back to groceryboix <span class="footer-star" aria-hidden="true">✳</span></a></span>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" defer></script>
+    <script src="config.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

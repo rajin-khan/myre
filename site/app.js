@@ -1,87 +1,97 @@
-const PEOPLE = [
-  { id: "rajin", name: "rajin" },
-  { id: "samiyeel", name: "samiyeel" },
-  { id: "saumik", name: "saumik" },
-];
-
-const LESSON_FOLDERS = [
-  {
-    name: "learn first",
-    path: "learning/01-learn",
-    lessons: [
-      {
-        id: "what-is-an-os",
-        title: "what is an operating system?",
-        file: "learning/01-learn/what-is-an-operating-system.md",
-        summary: "A first look at the jobs an operating system does.",
-      },
-      {
-        id: "how-a-computer-starts",
-        title: "how does a computer start?",
-        file: "learning/01-learn/how-a-computer-starts.md",
-        summary: "Follow the hand-off from power button to desktop.",
-      },
-    ],
-  },
-  {
-    name: "test small ideas",
-    path: "learning/02-test",
-    lessons: [
-      {
-        id: "first-safe-experiment",
-        title: "our first safe experiment",
-        file: "learning/02-test/first-safe-experiment.md",
-        summary: "Change one thing, keep notes, and find out what happened.",
-      },
-    ],
-  },
-  {
-    name: "make something",
-    path: "learning/03-make",
-    lessons: [
-      {
-        id: "first-small-build",
-        title: "pick a tiny thing to build",
-        file: "learning/03-make/first-small-build.md",
-        summary: "Turn something we learned into a small working project.",
-      },
-    ],
-  },
-];
-
-const STORAGE_KEY = "myre-learning-v1";
-const TASK_COLUMNS = [
+const PEOPLE = ["rajin", "samiyeel", "saumik"];
+const COLUMNS = [
   { id: "todo", name: "up next" },
   { id: "doing", name: "in progress" },
   { id: "done", name: "done for now" },
 ];
+const FOLDERS = [
+  {
+    id: "learn",
+    name: "learn first",
+    path: "learning/01-learn",
+    lessons: [
+      { id: "what-is-an-os", title: "what is an operating system?", file: "learning/01-learn/what-is-an-operating-system.md", summary: "A first look at the jobs an operating system does." },
+      { id: "how-a-computer-starts", title: "how does a computer start?", file: "learning/01-learn/how-a-computer-starts.md", summary: "Follow the hand-off from power button to desktop." },
+    ],
+  },
+  {
+    id: "test",
+    name: "test small ideas",
+    path: "learning/02-test",
+    lessons: [
+      { id: "first-safe-experiment", title: "our first safe experiment", file: "learning/02-test/first-safe-experiment.md", summary: "Change one thing, keep notes, and find out what happened." },
+    ],
+  },
+  {
+    id: "make",
+    name: "make something",
+    path: "learning/03-make",
+    lessons: [
+      { id: "first-small-build", title: "pick a tiny thing to build", file: "learning/03-make/first-small-build.md", summary: "Turn something we learned into a small working project." },
+    ],
+  },
+];
+
+const state = { videos: [], notes: [], tasks: [], checks: [] };
+const config = window.MYRE_SUPABASE || {};
 const videoForm = document.querySelector("#video-form");
-const videoUrlInput = document.querySelector("#video-url");
-const videoTitleInput = document.querySelector("#video-title");
-const videoUrlError = document.querySelector("#video-url-error");
+const videoUrl = document.querySelector("#video-url");
+const videoTitle = document.querySelector("#video-title");
+const videoError = document.querySelector("#video-url-error");
 const videoList = document.querySelector("#video-list");
+const noteForm = document.querySelector("#note-form");
+const noteTitle = document.querySelector("#note-title");
+const noteFolder = document.querySelector("#note-folder");
+const noteBody = document.querySelector("#note-body");
+const noteCancel = document.querySelector("#note-cancel-button");
+const noteSave = document.querySelector("#note-save-button");
 const lessonFolders = document.querySelector("#lesson-folders");
-const learningStatus = document.querySelector("#learning-status");
-const learningHub = document.querySelector("#learning-content");
 const taskForm = document.querySelector("#task-form");
-const taskTitleInput = document.querySelector("#task-title");
-const taskAssigneeInput = document.querySelector("#task-assignee");
-const kanbanColumns = document.querySelector(".kanban-columns");
+const taskTitle = document.querySelector("#task-title");
+const taskAssignee = document.querySelector("#task-assignee");
+const taskColumns = document.querySelector(".kanban-columns");
+const signInForm = document.querySelector("#sign-in-form");
+const learningContent = document.querySelector("#learning-content");
+const signedIn = document.querySelector("#signed-in");
+const signedInEmail = document.querySelector("#signed-in-email");
+const accessCopy = document.querySelector("#access-copy");
+const status = document.querySelector("#learning-status");
 
-function getYouTubeVideo(urlText) {
+let db = null;
+let canEdit = false;
+let editingNoteId = null;
+
+function announce(message) {
+  status.textContent = message;
+}
+
+function node(tag, className, text) {
+  const item = document.createElement(tag);
+  if (className) item.className = className;
+  if (text !== undefined) item.textContent = text;
+  return item;
+}
+
+function showEditorControls() {
+  document.querySelectorAll("[data-editor-only]").forEach((item) => {
+    item.hidden = !canEdit;
+  });
+  renderAll();
+}
+
+function getVideo(value) {
   try {
-    const url = new URL(urlText.trim());
-    const hostname = url.hostname.toLowerCase();
-    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
-
+    const url = new URL(value.trim());
+    if (!["https:", "http:"].includes(url.protocol)) return null;
+    const host = url.hostname.toLowerCase();
     let id = "";
-    if (hostname === "youtu.be") {
+    if (host === "youtu.be") {
       id = url.pathname.split("/").filter(Boolean)[0] || "";
-    } else if (hostname === "youtube.com" || hostname.endsWith(".youtube.com")) {
-      if (url.pathname === "/watch") id = url.searchParams.get("v") || "";
-      else id = url.pathname.split("/").filter(Boolean)[1] || "";
+    } else if (host === "youtube.com" || host.endsWith(".youtube.com")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "watch") id = url.searchParams.get("v") || "";
+      if (["shorts", "live", "embed"].includes(parts[0])) id = parts[1] || "";
     }
-
     return /^[A-Za-z0-9_-]{11}$/.test(id)
       ? { id, url: `https://www.youtube.com/watch?v=${id}` }
       : null;
@@ -90,340 +100,429 @@ function getYouTubeVideo(urlText) {
   }
 }
 
-function loadState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    const seen = new Set();
-    const videos = Array.isArray(saved.videos)
-      ? saved.videos.flatMap((video) => {
-          if (!video || typeof video.url !== "string") return [];
-          const parsed = getYouTubeVideo(video.url);
-          if (!parsed || seen.has(parsed.id)) return [];
-          seen.add(parsed.id);
-          return [{
-            ...parsed,
-            title: typeof video.title === "string" && video.title.trim()
-              ? video.title.trim().slice(0, 100)
-              : "YouTube video",
-          }];
-        })
-      : [];
-    const knownPeople = new Set(PEOPLE.map((person) => person.id));
-    const knownColumns = new Set(TASK_COLUMNS.map((column) => column.id));
-    const taskIds = new Set();
-    const tasks = Array.isArray(saved.tasks)
-      ? saved.tasks.flatMap((task) => {
-          if (!task || typeof task !== "object") return [];
-          const id = typeof task.id === "string" ? task.id : "";
-          const title = typeof task.title === "string" ? task.title.trim().slice(0, 120) : "";
-          if (!/^[a-z0-9-]{1,100}$/.test(id) || taskIds.has(id) || !title
-            || !knownPeople.has(task.assignee) || !knownColumns.has(task.status)) return [];
-          taskIds.add(id);
-          return [{ id, title, assignee: task.assignee, status: task.status }];
-        })
-      : [];
-    return {
-      videos,
-      tasks,
-      checks: saved.checks && typeof saved.checks === "object" && !Array.isArray(saved.checks)
-        ? saved.checks
-        : {},
-    };
-  } catch {
-    return { videos: [], checks: {}, tasks: [] };
-  }
+function checksFor(key) {
+  return state.checks.filter((item) => item.item_key === key && item.checked);
 }
 
-const state = loadState();
-
-function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function element(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
-function makeProgressChecks(itemKey, legendText) {
-  const fieldset = element("fieldset", "progress-checks");
-  fieldset.append(element("legend", "", legendText));
-  const people = element("div", "progress-people");
-  const checks = state.checks[itemKey] || {};
-
+function progressChecks(key, label) {
+  const fieldset = node("fieldset", "progress-checks");
+  fieldset.append(node("legend", "", label));
+  const people = node("div", "progress-people");
+  const checked = new Set(checksFor(key).map((item) => item.person_id));
   for (const person of PEOPLE) {
-    const label = element("label", "progress-person");
-    const input = document.createElement("input");
+    const wrapper = node("label", "progress-person");
+    const input = node("input");
     input.type = "checkbox";
-    input.id = `check-${itemKey}-${person.id}`;
-    input.checked = checks[person.id] === true;
-    input.dataset.progressKey = itemKey;
-    input.dataset.personId = person.id;
-    const name = element("span", "", person.name);
-    label.htmlFor = input.id;
-    label.append(input, name);
-    people.append(label);
+    input.checked = checked.has(person);
+    input.disabled = !canEdit;
+    input.dataset.progressKey = key;
+    input.dataset.personId = person;
+    wrapper.append(input, node("span", "", person));
+    people.append(wrapper);
   }
-
   fieldset.append(people);
   return fieldset;
 }
 
 function renderVideos() {
   videoList.replaceChildren();
-
   if (!state.videos.length) {
-    videoList.append(element("p", "empty-videos", "No videos pinned yet. Add the first one above."));
+    videoList.append(node("p", "empty-videos", "No videos pinned yet."));
     return;
   }
-
   for (const video of state.videos) {
-    const card = element("article", "video-item");
-    const thumbnailLink = element("a", "video-thumb");
-    thumbnailLink.href = video.url;
-    thumbnailLink.target = "_blank";
-    thumbnailLink.rel = "noopener noreferrer";
-    thumbnailLink.setAttribute("aria-label", `Watch ${video.title} on YouTube`);
-
-    const image = document.createElement("img");
+    const card = node("article", "video-item");
+    const link = node("a", "video-thumb");
+    link.href = `https://www.youtube.com/watch?v=${video.id}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.setAttribute("aria-label", `Watch ${video.title} on YouTube`);
+    const image = node("img");
     image.src = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
     image.alt = `Thumbnail for ${video.title}`;
     image.loading = "lazy";
     image.width = 480;
     image.height = 360;
-    thumbnailLink.append(image);
+    link.append(image);
 
-    const heading = element("div", "video-item-heading");
-    heading.append(element("h3", "", video.title));
-    const removeButton = element("button", "video-remove", "remove");
-    removeButton.type = "button";
-    removeButton.dataset.removeVideo = video.id;
-    removeButton.setAttribute("aria-label", `Remove ${video.title} from the YouTube pile`);
-    heading.append(removeButton);
-
-    card.append(thumbnailLink, heading, makeProgressChecks(`video-${video.id}`, "watched by"));
+    const heading = node("div", "video-item-heading");
+    heading.append(node("h3", "", video.title));
+    if (canEdit) {
+      const remove = node("button", "video-remove", "remove");
+      remove.type = "button";
+      remove.dataset.removeVideo = video.id;
+      remove.setAttribute("aria-label", `Remove ${video.title}`);
+      heading.append(remove);
+    }
+    card.append(link, heading, progressChecks(`video-${video.id}`, "watched by"));
     videoList.append(card);
   }
 }
 
 function renderLessons() {
   lessonFolders.replaceChildren();
+  for (const folder of FOLDERS) {
+    const section = node("section", "lesson-folder");
+    const heading = node("div", "lesson-folder-heading");
+    heading.append(node("h3", "", folder.name), node("code", "", folder.path));
+    const list = node("div", "lesson-list");
 
-  for (const folder of LESSON_FOLDERS) {
-    const section = element("section", "lesson-folder");
-    const heading = element("div", "lesson-folder-heading");
-    heading.append(element("h3", "", folder.name), element("code", "", folder.path));
+    for (const note of state.notes.filter((item) => item.folder === folder.id)) {
+      const details = node("details", "lesson-item note-item");
+      details.append(node("summary", "note-summary", note.title));
+      details.append(node("pre", "note-body", note.body));
+      if (canEdit) {
+        const actions = node("div", "note-item-actions");
+        const edit = node("button", "plain-button", "edit");
+        edit.type = "button";
+        edit.dataset.editNote = note.id;
+        edit.setAttribute("aria-label", `Edit ${note.title}`);
+        const remove = node("button", "plain-button", "remove");
+        remove.type = "button";
+        remove.dataset.removeNote = note.id;
+        remove.setAttribute("aria-label", `Remove ${note.title}`);
+        actions.append(edit, remove);
+        details.append(actions);
+      }
+      details.append(progressChecks(`note-${note.id}`, "read by"));
+      list.append(details);
+    }
 
-    const list = element("div", "lesson-list");
     for (const lesson of folder.lessons) {
-      const card = element("article", "lesson-item");
-      card.append(element("h4", "", lesson.title), element("p", "", lesson.summary));
-      const link = element("a", "lesson-link", "open markdown ↗");
+      const card = node("article", "lesson-item");
+      card.append(node("h4", "", lesson.title), node("p", "", lesson.summary));
+      const link = node("a", "lesson-link", "open markdown ↗");
       link.href = lesson.file;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       link.setAttribute("aria-label", `Open the Markdown lesson: ${lesson.title}`);
-      card.append(link, makeProgressChecks(`lesson-${lesson.id}`, "read by"));
+      card.append(link, progressChecks(`lesson-${lesson.id}`, "read by"));
       list.append(card);
     }
-
     section.append(heading, list);
     lessonFolders.append(section);
   }
 }
 
-function renderKanban() {
-  for (const column of TASK_COLUMNS) {
-    const list = kanbanColumns.querySelector(`[data-kanban-column="${column.id}"]`);
+function renderTasks() {
+  for (const column of COLUMNS) {
+    const list = taskColumns.querySelector(`[data-kanban-column="${column.id}"]`);
     const tasks = state.tasks.filter((task) => task.status === column.id);
     document.querySelector(`#count-${column.id}`).textContent = String(tasks.length);
     list.replaceChildren();
-
     if (!tasks.length) {
-      list.append(element("p", "empty-column", "nothing here yet."));
+      list.append(node("p", "empty-column", "nothing here yet."));
       continue;
     }
-
     for (const task of tasks) {
-      const card = element("article", `kanban-task assignee-${task.assignee}`);
-      card.dataset.assignee = task.assignee;
-      card.append(element("p", "kanban-task-title", task.title));
-
-      const controls = element("div", "kanban-task-controls");
-      const assigneeLabel = element("label", "visually-hidden", `Assignee for ${task.title}`);
-      const assigneeSelect = document.createElement("select");
-      assigneeSelect.id = `task-assignee-${task.id}`;
-      assigneeSelect.className = "task-control task-assignee";
-      assigneeSelect.dataset.taskAssignee = task.id;
-      assigneeSelect.setAttribute("aria-label", `Assignee for ${task.title}`);
-      assigneeSelect.dataset.assignee = task.assignee;
-      for (const person of PEOPLE) {
-        const option = element("option", "", person.name);
-        option.value = person.id;
-        option.selected = person.id === task.assignee;
-        assigneeSelect.append(option);
+      const card = node("article", `kanban-task assignee-${task.assignee}`);
+      card.append(node("p", "kanban-task-title", task.title));
+      if (canEdit) {
+        const controls = node("div", "kanban-task-controls");
+        const assignee = node("select", "task-control task-assignee");
+        assignee.dataset.taskAssignee = task.id;
+        assignee.dataset.assignee = task.assignee;
+        assignee.setAttribute("aria-label", `Assignee for ${task.title}`);
+        for (const person of PEOPLE) {
+          const option = node("option", "", person);
+          option.value = person;
+          assignee.append(option);
+        }
+        assignee.value = task.assignee;
+        const statusSelect = node("select", "task-control task-status");
+        statusSelect.dataset.taskStatus = task.id;
+        statusSelect.setAttribute("aria-label", `Column for ${task.title}`);
+        for (const status of COLUMNS) {
+          const option = node("option", "", status.name);
+          option.value = status.id;
+          statusSelect.append(option);
+        }
+        statusSelect.value = task.status;
+        const remove = node("button", "task-remove", "remove");
+        remove.type = "button";
+        remove.dataset.removeTask = task.id;
+        remove.setAttribute("aria-label", `Remove task: ${task.title}`);
+        controls.append(assignee, statusSelect, remove);
+        card.append(controls);
+      } else {
+        card.append(node("span", "task-owner", task.assignee));
       }
-      assigneeLabel.htmlFor = assigneeSelect.id;
-
-      const statusLabel = element("label", "visually-hidden", `Status for ${task.title}`);
-      const statusSelect = document.createElement("select");
-      statusSelect.id = `task-status-${task.id}`;
-      statusSelect.className = "task-control task-status";
-      statusSelect.dataset.taskStatus = task.id;
-      statusSelect.setAttribute("aria-label", `Move ${task.title} to a column`);
-      for (const status of TASK_COLUMNS) {
-        const option = element("option", "", status.name);
-        option.value = status.id;
-        option.selected = status.id === task.status;
-        statusSelect.append(option);
-      }
-      statusLabel.htmlFor = statusSelect.id;
-
-      const removeButton = element("button", "task-remove", "remove");
-      removeButton.type = "button";
-      removeButton.dataset.removeTask = task.id;
-      removeButton.setAttribute("aria-label", `Remove task: ${task.title}`);
-      controls.append(assigneeLabel, assigneeSelect, statusLabel, statusSelect, removeButton);
-      card.append(controls);
       list.append(card);
     }
   }
 }
 
-function announce(message) {
-  learningStatus.textContent = message;
+function renderAll() {
+  renderVideos();
+  renderLessons();
+  renderTasks();
 }
 
-videoForm.addEventListener("submit", (event) => {
+async function loadAll() {
+  const [videos, notes, tasks, checks] = await Promise.all([
+    db.from("myre_videos").select("id,title,created_at").order("created_at", { ascending: false }),
+    db.from("myre_notes").select("id,folder,title,body,created_at").order("created_at", { ascending: false }),
+    db.from("myre_tasks").select("id,title,assignee,status,created_at").order("created_at", { ascending: false }),
+    db.from("myre_checks").select("item_key,person_id,checked"),
+  ]);
+  const error = [videos, notes, tasks, checks].find((result) => result.error)?.error;
+  if (error) throw error;
+  state.videos = videos.data;
+  state.notes = notes.data;
+  state.tasks = tasks.data;
+  state.checks = checks.data;
+  renderAll();
+}
+
+async function save(query, message) {
+  const { error } = await query;
+  if (error) throw error;
+  await loadAll();
+  announce(message);
+}
+
+function report(error) {
+  announce(`Couldn't save that change. ${error.message || "Please try again."}`);
+}
+
+function setAccess(session) {
+  signInForm.hidden = Boolean(session);
+  signedIn.hidden = !session;
+  signedInEmail.textContent = session?.user?.email || "";
+  learningContent.hidden = !canEdit;
+  document.querySelector("#refresh-button").disabled = !canEdit;
+  accessCopy.textContent = canEdit
+    ? "Shared changes save for the whole crew."
+    : session
+      ? "This email isn't on the crew list."
+      : "Crew members can sign in to see and edit studies.";
+  showEditorControls();
+}
+
+async function refreshAccess() {
+  const { data: { session }, error } = await db.auth.getSession();
+  if (error) throw error;
+  canEdit = false;
+  if (session) {
+    const result = await db.rpc("myre_can_edit");
+    if (result.error) throw result.error;
+    canEdit = result.data === true;
+  }
+  setAccess(session);
+  if (canEdit) await loadAll();
+  else {
+    state.videos = [];
+    state.notes = [];
+    state.tasks = [];
+    state.checks = [];
+    renderAll();
+  }
+}
+
+signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  videoUrlInput.removeAttribute("aria-invalid");
-  videoUrlError.hidden = true;
-
-  if (!videoUrlInput.checkValidity()) {
-    videoUrlInput.reportValidity();
-    return;
+  if (!db || !signInForm.reportValidity()) return;
+  const email = document.querySelector("#editor-email").value.trim().toLowerCase();
+  const button = signInForm.querySelector("button");
+  button.disabled = true;
+  try {
+    const redirect = window.location.protocol === "https:" || window.location.protocol === "http:"
+      ? { emailRedirectTo: new URL("learning.html", window.location.href).href }
+      : {};
+    const { error } = await db.auth.signInWithOtp({ email, options: redirect });
+    if (error) throw error;
+    announce(`Check ${email} for a sign-in link.`);
+  } catch (error) {
+    report(error);
+  } finally {
+    button.disabled = false;
   }
-
-  const video = getYouTubeVideo(videoUrlInput.value);
-  if (!video) {
-    videoUrlInput.setAttribute("aria-invalid", "true");
-    videoUrlError.hidden = false;
-    videoUrlInput.focus();
-    return;
-  }
-
-  if (state.videos.some((saved) => saved.id === video.id)) {
-    videoUrlInput.setAttribute("aria-invalid", "true");
-    videoUrlError.textContent = "That video is already in the pile.";
-    videoUrlError.hidden = false;
-    videoUrlInput.focus();
-    return;
-  }
-
-  const title = videoTitleInput.value.trim().slice(0, 100) || "YouTube video";
-  state.videos.unshift({ ...video, title });
-  renderVideos();
-  videoForm.reset();
-  announce(saveState()
-    ? `Pinned ${title}. Video and progress are saved in this browser.`
-    : `Pinned ${title}, but this browser couldn't save it.`);
-  videoUrlInput.focus();
 });
 
-videoUrlInput.addEventListener("input", () => {
-  videoUrlInput.removeAttribute("aria-invalid");
-  videoUrlError.hidden = true;
-  videoUrlError.textContent = "That link doesn't look like a YouTube video. Try a youtube.com or youtu.be link.";
+document.querySelector("#sign-out-button").addEventListener("click", async () => {
+  if (!db) return;
+  const { error } = await db.auth.signOut();
+  if (error) return report(error);
+  await refreshAccess();
+  announce("Signed out.");
 });
 
-videoList.addEventListener("click", (event) => {
+document.querySelector("#refresh-button").addEventListener("click", async () => {
+  if (!db || !canEdit) return;
+  try {
+    await loadAll();
+    announce("Board refreshed.");
+  } catch (error) { report(error); }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (db && canEdit && !document.hidden) loadAll().catch(report);
+});
+
+videoForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  videoUrl.removeAttribute("aria-invalid");
+  videoError.hidden = true;
+  if (!canEdit || !videoUrl.reportValidity()) return;
+  const video = getVideo(videoUrl.value);
+  if (!video || state.videos.some((item) => item.id === video.id)) {
+    videoUrl.setAttribute("aria-invalid", "true");
+    videoError.textContent = video ? "That video is already pinned." : "Paste a youtube.com or youtu.be video link.";
+    videoError.hidden = false;
+    videoUrl.focus();
+    return;
+  }
+  const title = videoTitle.value.trim().slice(0, 100) || "YouTube video";
+  try {
+    await save(db.from("myre_videos").insert({ id: video.id, title }), `Pinned ${title}.`);
+    videoForm.reset();
+    videoUrl.focus();
+  } catch (error) { report(error); }
+});
+
+videoUrl.addEventListener("input", () => {
+  videoUrl.removeAttribute("aria-invalid");
+  videoError.hidden = true;
+});
+
+videoList.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-remove-video]");
-  if (!button) return;
-
-  const id = button.dataset.removeVideo;
-  const video = state.videos.find((saved) => saved.id === id);
-  state.videos = state.videos.filter((saved) => saved.id !== id);
-  delete state.checks[`video-${id}`];
-  renderVideos();
-  announce(saveState()
-    ? `Removed ${video?.title || "the video"} from the pile.`
-    : `Removed ${video?.title || "the video"}, but this browser couldn't save the change.`);
+  if (!button || !canEdit) return;
+  const video = state.videos.find((item) => item.id === button.dataset.removeVideo);
+  if (!video || !window.confirm(`Remove ${video.title}?`)) return;
+  try {
+    await save(db.from("myre_videos").delete().eq("id", video.id), `Removed ${video.title}.`);
+  } catch (error) { report(error); }
 });
 
-learningHub.addEventListener("change", (event) => {
-  const input = event.target;
-  if (input.matches("select[data-task-assignee], select[data-task-status]")) {
-    const isAssignee = input.matches("[data-task-assignee]");
-    const taskId = isAssignee ? input.dataset.taskAssignee : input.dataset.taskStatus;
-    const task = state.tasks.find((saved) => saved.id === taskId);
-    if (!task) return;
-
-    if (isAssignee) {
-      task.assignee = input.value;
-    } else {
-      task.status = input.value;
-    }
-    const focusId = isAssignee ? `task-assignee-${taskId}` : `task-status-${taskId}`;
-    renderKanban();
-    document.getElementById(focusId)?.focus();
-    announce(saveState()
-      ? `Updated ${task.title} on this browser.`
-      : `Updated ${task.title}, but this browser couldn't save the change.`);
-    return;
-  }
-
-  if (!input.matches("input[data-progress-key]")) return;
-
-  const { progressKey, personId } = input.dataset;
-  state.checks[progressKey] ||= {};
-  state.checks[progressKey][personId] = input.checked;
-  announce(saveState()
-    ? `Saved ${personId}'s check on this browser.`
-    : `Changed ${personId}'s check, but this browser couldn't save it.`);
-});
-
-taskTitleInput.addEventListener("input", () => taskTitleInput.setCustomValidity(""));
-
-taskForm.addEventListener("submit", (event) => {
+noteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const title = taskTitleInput.value.trim().slice(0, 120);
-  if (!title) {
-    taskTitleInput.setCustomValidity("Add a short task name first.");
-    taskTitleInput.reportValidity();
+  if (!canEdit || !noteForm.reportValidity()) return;
+  const values = {
+    folder: noteFolder.value,
+    title: noteTitle.value.trim().slice(0, 120),
+    body: noteBody.value.trim().slice(0, 20000),
+  };
+  if (!values.title || !values.body) return;
+  try {
+    const query = editingNoteId
+      ? db.from("myre_notes").update(values).eq("id", editingNoteId)
+      : db.from("myre_notes").insert(values);
+    await save(query, editingNoteId ? `Updated ${values.title}.` : `Saved ${values.title}.`);
+    noteForm.reset();
+    editingNoteId = null;
+    noteCancel.hidden = true;
+    noteSave.textContent = "save note";
+    noteTitle.focus();
+  } catch (error) { report(error); }
+});
+
+noteCancel.addEventListener("click", () => {
+  editingNoteId = null;
+  noteForm.reset();
+  noteCancel.hidden = true;
+  noteSave.textContent = "save note";
+  noteTitle.focus();
+});
+
+lessonFolders.addEventListener("click", async (event) => {
+  const edit = event.target.closest("[data-edit-note]");
+  const remove = event.target.closest("[data-remove-note]");
+  if (!canEdit || (!edit && !remove)) return;
+  const note = state.notes.find((item) => item.id === (edit?.dataset.editNote || remove?.dataset.removeNote));
+  if (!note) return;
+  if (edit) {
+    editingNoteId = note.id;
+    noteTitle.value = note.title;
+    noteFolder.value = note.folder;
+    noteBody.value = note.body;
+    noteSave.textContent = "update note";
+    noteCancel.hidden = false;
+    noteForm.scrollIntoView({ block: "start", behavior: "smooth" });
+    noteTitle.focus();
     return;
   }
-
-  const taskId = globalThis.crypto?.randomUUID?.()
-    || `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
-  state.tasks.unshift({ id: taskId, title, assignee: taskAssigneeInput.value, status: "todo" });
-  renderKanban();
-  taskForm.reset();
-  announce(saveState()
-    ? `Added ${title}. The task board is saved in this browser.`
-    : `Added ${title}, but this browser couldn't save the task.`);
-  taskTitleInput.focus();
+  if (!window.confirm(`Remove ${note.title}?`)) return;
+  try {
+    await save(db.from("myre_notes").delete().eq("id", note.id), `Removed ${note.title}.`);
+  } catch (error) { report(error); }
 });
 
-kanbanColumns.addEventListener("click", (event) => {
+taskForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!canEdit || !taskForm.reportValidity()) return;
+  const title = taskTitle.value.trim().slice(0, 120);
+  if (!title) return;
+  try {
+    await save(db.from("myre_tasks").insert({ title, assignee: taskAssignee.value, status: "todo" }), `Added ${title}.`);
+    taskForm.reset();
+    taskTitle.focus();
+  } catch (error) { report(error); }
+});
+
+taskColumns.addEventListener("change", async (event) => {
+  const input = event.target;
+  const id = input.dataset.taskAssignee || input.dataset.taskStatus;
+  if (!id || !canEdit) return;
+  const task = state.tasks.find((item) => item.id === id);
+  if (!task) return;
+  const field = input.dataset.taskAssignee ? "assignee" : "status";
+  try {
+    await save(db.from("myre_tasks").update({ [field]: input.value }).eq("id", id), `Updated ${task.title}.`);
+  } catch (error) {
+    renderTasks();
+    report(error);
+  }
+});
+
+taskColumns.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-remove-task]");
-  if (!button) return;
-
-  const task = state.tasks.find((saved) => saved.id === button.dataset.removeTask);
-  state.tasks = state.tasks.filter((saved) => saved.id !== button.dataset.removeTask);
-  renderKanban();
-  announce(saveState()
-    ? `Removed ${task?.title || "the task"} from the board.`
-    : `Removed ${task?.title || "the task"}, but this browser couldn't save the change.`);
-  taskTitleInput.focus();
+  if (!button || !canEdit) return;
+  const task = state.tasks.find((item) => item.id === button.dataset.removeTask);
+  if (!task || !window.confirm(`Remove ${task.title}?`)) return;
+  try {
+    await save(db.from("myre_tasks").delete().eq("id", task.id), `Removed ${task.title}.`);
+  } catch (error) { report(error); }
 });
 
-renderVideos();
-renderLessons();
-renderKanban();
+document.querySelector("#learning-content").addEventListener("change", async (event) => {
+  const input = event.target;
+  if (!input.matches("input[data-progress-key]") || !canEdit) return;
+  const { progressKey, personId } = input.dataset;
+  input.disabled = true;
+  try {
+    await save(
+      db.from("myre_checks").upsert(
+        { item_key: progressKey, person_id: personId, checked: input.checked },
+        { onConflict: "item_key,person_id" },
+      ),
+      `Saved ${personId}'s progress.`,
+    );
+  } catch (error) {
+    input.disabled = false;
+    input.checked = !input.checked;
+    report(error);
+  }
+});
+
+async function start() {
+  renderAll();
+  if (!config.url || !config.publishableKey || !window.supabase?.createClient) {
+    accessCopy.textContent = "Shared editing is being set up. The starter lessons are still here.";
+    announce("No shared database is connected yet.");
+    return;
+  }
+  db = window.supabase.createClient(config.url, config.publishableKey);
+  try {
+    await refreshAccess();
+    announce(canEdit ? "Shared board is ready." : "Sign in to open studies.");
+    db.auth.onAuthStateChange(() => {
+      window.setTimeout(() => refreshAccess().catch(report), 0);
+    });
+  } catch (error) {
+    accessCopy.textContent = "The shared board could not load.";
+    report(error);
+  }
+}
+
+start();
