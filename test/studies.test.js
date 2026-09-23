@@ -30,7 +30,7 @@ test("three-name password gate protects the board and writes", async () => {
   const calls = [];
   try {
     process.env.MYRE_SESSION_SECRET = "a-long-independent-secret-for-testing-123";
-    process.env.MYRE_PASSWORD_RAJIN = "rajin-random-test-password";
+    process.env.MYRE_PASSWORD_RAJIN = "x";
     process.env.MYRE_PASSWORD_SAMIYEEL = "samiyeel-random-test-password";
     process.env.MYRE_PASSWORD_SAUMIK = "saumik-random-test-password";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "server-only-test-key";
@@ -65,12 +65,12 @@ test("three-name password gate protects the board and writes", async () => {
     assert.equal(result.statusCode, 400);
 
     result = response();
-    await handler(request("POST", { action: "login", name: "rajin", password: "rajin-random-test-password" },
+    await handler(request("POST", { action: "login", name: "rajin", password: "x" },
       null, "https://another.example"), result);
     assert.equal(result.statusCode, 403);
 
     result = response();
-    await handler(request("POST", { action: "login", name: "rajin", password: "rajin-random-test-password" }), result);
+    await handler(request("POST", { action: "login", name: "rajin", password: "x" }), result);
     assert.equal(result.statusCode, 200);
     const cookie = result.headers["set-cookie"].split(";")[0];
     assert.match(result.headers["set-cookie"], /HttpOnly; Secure; SameSite=Strict/);
@@ -106,7 +106,7 @@ test("three-name password gate protects the board and writes", async () => {
     assert.equal(result.statusCode, 200);
     assert.match(calls.at(-1).url, /myre_checks\?on_conflict=item_key%2Cperson_id$/);
 
-    process.env.MYRE_PASSWORD_RAJIN = "new-rajin-random-test-password";
+    process.env.MYRE_PASSWORD_RAJIN = "y";
     result = response();
     await handler(request("GET", null, cookie), result);
     assert.deepEqual(result.body, { name: null });

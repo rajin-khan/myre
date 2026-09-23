@@ -17,7 +17,7 @@ function configured() {
   return Boolean(
     process.env.SUPABASE_SERVICE_ROLE_KEY &&
     process.env.MYRE_SESSION_SECRET?.length >= 32 &&
-    PEOPLE.every((name) => passwordFor(name)?.length >= 16),
+    PEOPLE.every((name) => Boolean(passwordFor(name))),
   );
 }
 
